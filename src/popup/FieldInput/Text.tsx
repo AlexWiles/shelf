@@ -14,9 +14,9 @@ export const TextInput: React.FC<{ url: string; urlData: UrlData; field: Field }
   return (
     <div style={{ display: "flex" }} key={field.get("id")}>
       <InputLabel field={field} />
-      <Input
+      <Input.TextArea
         style={{ width: 250, marginRight: 5, marginBottom: 5 }}
-        size="small"
+        autoSize={{ minRows: 1 }}
         value={
           urlData.getIn(["values", field.get("id")])
             ? String(urlData.getIn(["values", field.get("id")]))

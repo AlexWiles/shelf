@@ -63,6 +63,18 @@ export const DataTable: React.FC = () => {
           title: field.label,
           key: field.id,
           dataIndex: field.id,
+          render: (value: string) => (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: 100
+              }}
+            >
+              {value}
+            </div>
+          ),
         };
       }
     }),

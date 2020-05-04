@@ -1,32 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Map, List } from "immutable";
 import "antd/dist/antd.css";
 import "./Popup.scss";
 
 import { Provider, useSelector, useDispatch } from "react-redux";
-import { Button } from "antd";
-import {
-  store,
-  setUrlData,
-  setUrl,
-} from "./store";
-import {
-  State,
-  UrlData,
-  CurrentUrl,
-} from "./types";
+import { Button, Layout } from "antd";
+import { store, setUrlData, setUrl } from "./store";
+import { State, UrlData, CurrentUrl } from "./types";
 import { uuid } from "../lib";
 import { AddField } from "./AddField";
 import { FieldInput } from "./FieldInput";
 import { DataTable } from "./DataTable";
-
 
 export const AppProvider: React.FC = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
 };
 
 const UrlDataDisplay: React.FC<{ url: string }> = ({ url }) => {
-
   const allFields = useSelector<State, List<string>>((state) =>
     state.get("allFields")
   );
@@ -124,7 +114,9 @@ const getCurrentUrl = (cb: (url: string) => void) => {
 const AppComponent: React.FC = () => {
   const dispatch = useDispatch();
 
-  const currentUrl = useSelector<State, CurrentUrl>(state => state.get('currentUrl'))
+  const currentUrl = useSelector<State, CurrentUrl>((state) =>
+    state.get("currentUrl")
+  );
 
   useEffect(() => {
     setInterval(() => {
@@ -145,9 +137,20 @@ const AppComponent: React.FC = () => {
 };
 
 const Popup: React.FC = () => {
+  const [sidebar, setSidebar] = useState(false);
+
   return (
     <AppProvider>
-      <AppComponent />
+      <Layout style={{ minHeight: "100vh" }}>
+        <Layout.Sider
+          collapsible
+          collapsed={!sidebar}
+          onCollapse={(v) => setSidebar(!v)}
+        ></Layout.Sider>
+        <Layout.Content>
+          <AppComponent />
+        </Layout.Content>
+      </Layout>
     </AppProvider>
   );
 };
