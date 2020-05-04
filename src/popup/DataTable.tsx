@@ -1,31 +1,30 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { DataState, Field, DataById } from "../types";
-import { List } from "immutable";
+import { DataState, Field, DataById, getTagById } from "../types";
 import { notUndefined } from "../lib";
 import { Table, Tag as AntdTag, Rate } from "antd";
 import { setCurrentDataId } from "./store";
 
 export const DataTable: React.FC = () => {
-  const fields = useSelector<DataState, List<Field>>((state) => {
-    return state
-      .get("allFields")
-      .map((id) => state.get("fieldsById").get(id))
-      .filter((f) => notUndefined(f)) as List<Field>;
+  const fields = useSelector<DataState, Field[]>((state) => {
+    return state.allFields
+      .map((id) => state.fieldsById[id])
+      .filter((f) => notUndefined(f)) as Field[];
   });
 
-  const data = useSelector<DataState, DataById>((state) => state.get("dataById"));
+  const data = useSelector<DataState, DataById>((state) =>
+    state.dataById
+  );
 
   const dispatch = useDispatch();
 
-  const dataSource = data.entrySeq()
+  const dataSource = Object.entries(data)
     .map(([id, data]) => {
       return {
-        ...{ key: id, id: data.get("id") },
-        ...data.get("values").toJS(),
+        ...{ key: id, id: data.id },
+        ...data.values,
       };
-    })
-    .toArray();
+    });
 
   const columns = [
     {
@@ -46,11 +45,11 @@ export const DataTable: React.FC = () => {
           dataIndex: field.id,
           render: (tagIds: undefined | string[]) => {
             return (tagIds || []).map((tagId) => (
-              <AntdTag key={tagId}>{field.getTagById(tagId)?.label}</AntdTag>
+              <AntdTag key={tagId}>{getTagById(field, tagId)?.label}</AntdTag>
             ));
           },
         };
-      } else if (field.get("type") === "rate") {
+      } else if (field.type === "rate") {
         return {
           title: field.label,
           key: field.id,
@@ -68,7 +67,7 @@ export const DataTable: React.FC = () => {
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                maxWidth: 100
+                maxWidth: 100,
               }}
             >
               {value}

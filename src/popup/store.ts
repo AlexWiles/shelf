@@ -7,8 +7,11 @@ import {
   DataState,
   Field,
   Tag,
+  getTagById,
+  initialDataState,
 } from "../types";
-import { Set, List, fromJS } from "immutable";
+
+import produce from "immer";
 
 export type Action =
   | { type: "SET_CURRENT_DATA_ID"; data: { id: string } }
@@ -72,57 +75,68 @@ export const updateValueTags = (id: string, fieldId: string, tags: Tag[]) => ({
   },
 });
 
-export const reducer = (state: DataState = new DataState(), action: Action): DataState => {
-  console.log(state.toJS(), action);
+export const reducer = (
+  state: DataState = initialDataState,
+  action: Action
+): DataState => {
+  console.log(action);
 
   switch (action.type) {
     case "SET_CURRENT_DATA_ID":
-      return state.set("currentDataId", action.data.id);
+      return produce(state, (draftState) => {
+        draftState.currentDataId = action.data.id;
+      });
     case "SET_DATA":
-      return state.setIn(["dataById", action.data.id], action.data.data);
+      return produce(state, (draftState) => {
+        draftState.dataById[action.data.id] = action.data.data;
+      });
     case "SET_DATA_FIELD_VALUE":
-      return state.setIn(
-        ["dataById", action.data.id, "values", action.data.fieldId],
-        action.data.value
-      );
+      return produce(state, (draftState) => {
+        draftState.dataById[action.data.id].values[action.data.fieldId] =
+          action.data.value;
+      });
     case "UPDATE_FIELD_LABEL":
-      return state.setIn(
-        ["fieldsById", action.data.fieldId, "label"],
-        action.data.label
-      );
+      return produce(state, (draftState) => {
+        draftState.fieldsById[action.data.fieldId].label = action.data.label;
+      });
     case "ADD_FIELD":
-      return state
-        .update("allFields", (fields) => fields.push(action.data.id))
-        .setIn(
-          ["fieldsById", action.data.id],
-          new Field({
-            id: action.data.id,
-            type: action.data.fieldType,
-            label: action.data.label,
-          })
-        );
+      return produce(state, (draftState) => {
+        draftState.allFields.push(action.data.id);
+
+        const newField = {
+          id: action.data.id,
+          type: action.data.fieldType,
+          label: action.data.label,
+          tags: [],
+        };
+        draftState.fieldsById[action.data.id] = newField;
+      });
     case "UPDATE_VALUE_TAGS":
-      const field = state.get("fieldsById").get(action.data.fieldId);
+      return produce(state, (draftState) => {
+        if (draftState.fieldsById[action.data.fieldId]) {
+          const field = draftState.fieldsById[action.data.fieldId];
+          const newTags = action.data.tags.filter((currTag) => {
+            return !getTagById(field, currTag.id);
+          });
 
-      if (field) {
-        const newTags = action.data.tags.filter((currTag) => {
-          return !field.getTagById(currTag.id);
-        });
+          const nextTags = [
+            ...draftState.fieldsById[action.data.fieldId].tags,
+            ...newTags,
+          ];
 
-        const newField = newTags.reduce((f, tag) => {
-          return f
-            .update("tags", (tags) => tags.merge(Set([tag])));
-        }, field);
-
-        return state
-          .setIn(["fieldsById", newField.id], newField)
-          .setIn(
-            ["dataById", action.data.id, "values", action.data.fieldId],
-            List(action.data.tags.map((t) => t.id))
+          draftState.fieldsById[action.data.fieldId].tags = nextTags.uniqueBy(
+            (t) => t.id
           );
-      } else {
-        return state;
-      }
+
+          const dataTagIds = action.data.tags
+            .map((t) => t.id)
+            .uniqueBy((s) => s);
+
+          draftState.dataById[action.data.id].values[
+            action.data.fieldId
+          ] = dataTagIds;
+        }
+      });
     default:
       return state;
   }
@@ -130,16 +144,16 @@ export const reducer = (state: DataState = new DataState(), action: Action): Dat
 
 export const loadState = (): DataState => {
   try {
-    const serializedState = localStorage.getItem("state") || "{}";
-    return new DataState(fromJS(JSON.parse(serializedState)));
+    const serializedState = localStorage.getItem("state");
+    return serializedState ? JSON.parse(serializedState) : initialDataState;
   } catch (err) {
-    return new DataState();
+    return initialDataState;
   }
 };
 
 export const saveState = (state: DataState): void => {
   try {
-    const serializedState = JSON.stringify(state.toJS());
+    const serializedState = JSON.stringify(state);
     localStorage.setItem("state", serializedState);
   } catch (err) {
     console.log(err);

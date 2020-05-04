@@ -11,27 +11,28 @@ export const FieldInput: React.FC<{
   id: string;
   fieldId: string;
 }> = ({ id, fieldId }) => {
-  const urlData = useSelector<DataState, Data>(
-    (state) => state.get("dataById").get(id) || new Data()
+
+  const data = useSelector<DataState, Data | undefined>(
+    (state) => state.dataById[id]
   );
 
   const field = useSelector<DataState, Field | undefined>((state) =>
-    state.get("fieldsById").get(fieldId)
+    state.fieldsById[fieldId]
   );
 
-  if (!field) {
+  if (!field || !data) {
     return <></>;
   }
 
-  switch (field.get("type")) {
+  switch (field.type) {
     case "text":
-      return <TextInput url={id} field={field} urlData={urlData} />;
+      return <TextInput url={id} field={field} urlData={data} />;
     case "tags":
-      return <TagsInputs url={id} field={field} urlData={urlData} />;
+      return <TagsInputs url={id} field={field} urlData={data} />;
     case "select":
-      return <SelectInput url={id} field={field} urlData={urlData} />;
+      return <SelectInput url={id} field={field} urlData={data} />;
     case "rate":
-      return <RateInput url={id} field={field} urlData={urlData} />;
+      return <RateInput url={id} field={field} urlData={data} />;
     default:
       return <div></div>;
   }

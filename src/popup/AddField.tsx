@@ -19,7 +19,6 @@ export const AddField = () => {
       <div>
         <Button
           style={{ width: 95, marginRight: 5, marginBottom: 5 }}
-          size="small"
           type="default"
           onClick={(e) => {
             e.preventDefault();

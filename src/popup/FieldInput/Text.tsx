@@ -5,25 +5,21 @@ import { Input } from "antd";
 import { setDataFieldValue } from "../store";
 import { InputLabel } from "./InputLabel";
 
-export const TextInput: React.FC<{ url: string; urlData: Data; field: Field }> = ({
-  url,
-  field,
-  urlData,
-}) => {
+export const TextInput: React.FC<{
+  url: string;
+  urlData: Data;
+  field: Field;
+}> = ({ url, field, urlData }) => {
   const dispatch = useDispatch();
   return (
-    <div style={{ display: "flex" }} key={field.get("id")}>
+    <div style={{ display: "flex" }} key={field.id}>
       <InputLabel field={field} />
       <Input.TextArea
         style={{ width: 250, marginRight: 5, marginBottom: 5 }}
         autoSize={{ minRows: 1 }}
-        value={
-          urlData.getIn(["values", field.get("id")])
-            ? String(urlData.getIn(["values", field.get("id")]))
-            : ""
-        }
+        value={urlData.values[field.id] ? String(urlData.values[field.id]) : ""}
         onChange={(e) => {
-          dispatch(setDataFieldValue(url, field.get("id"), e.target.value));
+          dispatch(setDataFieldValue(url, field.id, e.target.value));
         }}
       />
     </div>

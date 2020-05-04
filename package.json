@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "antd": "^4.2.0",
+    "immer": "^6.0.3",
     "immutable": "^4.0.0-rc.12",
     "moment": "^2.25.1",
     "react": "^16.13.1",

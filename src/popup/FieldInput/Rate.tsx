@@ -12,17 +12,18 @@ export const RateInput: React.FC<{ url: string; urlData: Data; field: Field }> =
 }) => {
   const dispatch = useDispatch();
   return (
-    <div style={{ display: "flex" }} key={field.get("id")}>
+    <div style={{ display: "flex" }} key={field.id}>
       <InputLabel field={field} />
       <Rate
         style={{ width: 250, marginRight: 5, marginBottom: 5 }}
+        allowHalf={true}
         value={
-          urlData.getIn(["values", field.get("id")])
-            ? urlData.getIn(["values", field.get("id")]) as number
+          urlData.values[field.id]
+            ? urlData.values[field.id] as number
             : 0
         }
         onChange={(value) => {
-          dispatch(setDataFieldValue(url, field.get("id"), value));
+          dispatch(setDataFieldValue(url, field.id, value));
         }}
       />
     </div>

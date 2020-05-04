@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Map, List } from "immutable";
-import "antd/dist/antd.css";
 import "./Popup.scss";
-
+import "antd/dist/antd.css";
+import React, { useEffect, useState } from "react";
 import { Provider, useSelector, useDispatch } from "react-redux";
-import { Button, Layout, Breadcrumb } from "antd";
+import { Button, Layout } from "antd";
 import { store, setData, setCurrentDataId } from "./store";
 import { DataState, Data, CurrentDataId } from "../types";
 import { uuid } from "../lib";
@@ -17,8 +15,8 @@ export const AppProvider: React.FC = ({ children }) => {
 };
 
 const DataDisplay: React.FC<{ id: string }> = ({ id }) => {
-  const allFields = useSelector<DataState, List<string>>((state) =>
-    state.get("allFields")
+  const allFields = useSelector<DataState, string[]>(
+    (state) => state.allFields
   );
 
   return (
@@ -28,61 +26,83 @@ const DataDisplay: React.FC<{ id: string }> = ({ id }) => {
           return <FieldInput id={id} key={fieldId} fieldId={fieldId} />;
         })}
       </div>
-      <AddField />
+    </div>
+  );
+};
+
+const UrlDisplay: React.FC<{ currentUrl: CurrentDataId }> = ({
+  currentUrl,
+}) => {
+  return (
+    <div style={{ display: "flex" }}>
+      <div style={{ width: 150, marginRight: 5, marginBottom: 5 }}>URL</div>
+      <div
+        style={{
+          flexGrow: 1,
+          marginRight: 5,
+          marginBottom: 5,
+          whiteSpace: "nowrap",
+
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        <a href={currentUrl} target="_blank">
+          {currentUrl}
+        </a>
+      </div>
     </div>
   );
 };
 
 const Body: React.FC = () => {
-  const currDataid = useSelector<DataState, CurrentDataId>((state) =>
-    state.get("currentDataId")
+  const currDataId = useSelector<DataState, CurrentDataId>(
+    (state) => state.currentDataId
   );
 
   const currData = useSelector<DataState, Data | undefined>((state) =>
-    state.get("currentDataId")
-      ? state.get("dataById").get(state.get("currentDataId") || "")
-      : undefined
+    state.currentDataId ? state.dataById[state.currentDataId] || "" : undefined
   );
 
   const dispatch = useDispatch();
 
-  if (!currDataid) {
+  if (!currDataId) {
     return <div>Please visit a web page in the browser </div>;
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <div style={{ display: "flex" }}>
-          <div style={{ width: 150, marginRight: 5, marginBottom: 5 }}>URL</div>
-          <div
-            style={{
-              flexGrow: 1,
-              marginRight: 5,
-              marginBottom: 5,
-              whiteSpace: "nowrap",
-
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            <a href={currDataid} target="_blank">
-              {currDataid}
-            </a>
-          </div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        height: "100%",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          height: "100%",
+        }}
+      >
+        <div>
+          <UrlDisplay currentUrl={currDataId} />
+          {currData ? <DataDisplay id={currDataId} /> : undefined}
         </div>
+
         {currData ? (
-          <DataDisplay id={currDataid} />
+          <div>
+            <AddField />
+          </div>
         ) : (
-          <div style={{ display: "flex" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
               type="primary"
-              size="large"
               onClick={(e) => {
                 e.preventDefault();
-                dispatch(
-                  setData(currDataid, new Data({ id: uuid(), values: Map({}) }))
-                );
+                dispatch(setData(currDataId, { id: uuid(), values: {} }));
               }}
             >
               Save URL
@@ -111,8 +131,8 @@ const getCurrentUrl = (cb: (url: string) => void) => {
 const AppComponent: React.FC = () => {
   const dispatch = useDispatch();
 
-  const currentDataId = useSelector<DataState, CurrentDataId>((state) =>
-    state.get("currentDataId")
+  const currentDataId = useSelector<DataState, CurrentDataId>(
+    (state) => state.currentDataId
   );
 
   useEffect(() => {
@@ -145,7 +165,7 @@ const Popup: React.FC = () => {
         ></Layout.Sider>
         <Layout>
           <div style={{ paddingLeft: 12, paddingTop: 12 }}>
-            <h2>hello</h2>
+            Hello
           </div>
           <Layout.Content style={{ padding: 12 }}>
             <AppComponent />

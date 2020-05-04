@@ -13,10 +13,10 @@ export const InputLabel: React.FC<{field: Field}> = ({field}) => {
         strong
         style={{ width: "100%" }}
         editable={{
-          onChange: (v) => dispatch(updateFieldLabel(field.get("id"), v)),
+          onChange: (v) => dispatch(updateFieldLabel(field.id, v)),
         }}
       >
-        {field.get("label")}
+        {field.label}
       </Typography.Text>
     </div>
   );

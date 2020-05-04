@@ -1,6 +1,5 @@
-import { Tag, Data, Field } from "../../types";
+import { Tag, Data, Field, getTagById, getTagByLabel } from "../../types";
 import { useDispatch } from "react-redux";
-import { OrderedSet } from "immutable";
 import { LabeledValue } from "antd/lib/select";
 import { Select } from "antd";
 import { uuid } from "../../lib";
@@ -15,31 +14,25 @@ export const SelectInput: React.FC<{
 }> = ({ url, urlData, field }) => {
   const dispatch = useDispatch();
 
-  const urlTagIds = urlData
-    .get("values")
-    .get(field.get("id"), OrderedSet()) as OrderedSet<string>;
-
-  const options: LabeledValue[] = field
-    .get("tags")
+  const options: LabeledValue[] = field.tags
     .map(
       (tag): LabeledValue => ({
         key: tag.id,
         value: tag.label,
         label: tag.label,
       })
-    )
-    .toArray();
+    );
 
-  const values = options.filter((opt) => urlTagIds.includes(opt.key || ""));
+  const urlTagIds = urlData.values[field.id] as string[] || [];
+  const values = options.filter((opt) => urlTagIds.find(id => id == opt.key ));
 
   const onChange = (tags: LabeledValue[]): void => {
     const selectedTags = tags.map(
       (tag): Tag => {
-        return (
-          field.getTagById(tag.key || "") ||
-          field.getTagByLabel(String(tag.value) || "") ||
-          new Tag({ id: uuid(), label: String(tag.value) })
-        );
+        const byId = getTagById(field, tag.key || "");
+        const byLabel = getTagByLabel(field, String(tag.value) || "");
+        const newTag = { id: uuid(), label: String(tag.value) };
+        return byId || byLabel || newTag;
       }
     );
 
@@ -49,16 +42,16 @@ export const SelectInput: React.FC<{
       values.length === 0
         ? selectedTags
         : selectedTags.filter((tag) => {
-            return !values.find((v) => v.key === tag.get("id"));
+            return !values.find((v) => v.key === tag.id);
           });
 
     dispatch(
-      updateValueTags(url, field.get("id"), OrderedSet(nextTags).toArray())
+      updateValueTags(url, field.id, nextTags)
     );
   };
 
   return (
-    <div style={{ display: "flex" }} key={field.get("id")}>
+    <div style={{ display: "flex" }} key={field.id}>
       <InputLabel field={field} />
       <Select
         size="small"
