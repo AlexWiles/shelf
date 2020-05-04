@@ -45,13 +45,15 @@ export type FieldsById = { [fieldId: string]: Field };
 export type DataById = { [dataId: string]: Data };
 
 export type DataState = {
+  name: string;
   currentDataId: CurrentDataId;
   dataById: DataById;
   allFields: FieldId[];
   fieldsById: FieldsById;
 };
 
-export const initialDataState = {
+export const initialDataState: DataState = {
+  name: "",
   currentDataId: undefined,
   dataById: {},
   allFields: [],

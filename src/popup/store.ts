@@ -14,6 +14,7 @@ import {
 import produce from "immer";
 
 export type Action =
+  | { type: "UPDATE_NAME"; data: { name: string } }
   | { type: "SET_CURRENT_DATA_ID"; data: { id: string } }
   | { type: "SET_DATA"; data: { id: string; data: Data } }
   | {
@@ -32,6 +33,11 @@ export type Action =
       type: "UPDATE_VALUE_TAGS";
       data: { id: string; fieldId: string; tags: Tag[] };
     };
+
+export const updateName = (name: string): Action => ({
+  type: "UPDATE_NAME",
+  data: { name },
+});
 
 export const setCurrentDataId = (id: string): Action => ({
   type: "SET_CURRENT_DATA_ID",
@@ -82,6 +88,10 @@ export const reducer = (
   console.log(action);
 
   switch (action.type) {
+    case "UPDATE_NAME":
+      return produce(state, (draftState) => {
+        draftState.name = action.data.name
+      })
     case "SET_CURRENT_DATA_ID":
       return produce(state, (draftState) => {
         draftState.currentDataId = action.data.id;

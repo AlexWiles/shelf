@@ -2,8 +2,8 @@ import "./Popup.scss";
 import "antd/dist/antd.css";
 import React, { useEffect, useState } from "react";
 import { Provider, useSelector, useDispatch } from "react-redux";
-import { Button, Layout } from "antd";
-import { store, setData, setCurrentDataId } from "./store";
+import { Button, Layout, Typography, Menu } from "antd";
+import { store, setData, setCurrentDataId, updateName } from "./store";
 import { DataState, Data, CurrentDataId } from "../types";
 import { uuid } from "../lib";
 import { AddField } from "./AddField";
@@ -126,12 +126,14 @@ const getCurrentUrl = (cb: (url: string) => void) => {
   );
 };
 
-const AppComponent: React.FC = () => {
+const DataScreen: React.FC = () => {
   const dispatch = useDispatch();
 
   const currentDataId = useSelector<DataState, CurrentDataId>(
     (state) => state.currentDataId
   );
+
+  const name = useSelector<DataState, string>((s) => s.name);
 
   useEffect(() => {
     setInterval(() => {
@@ -144,35 +146,58 @@ const AppComponent: React.FC = () => {
   });
 
   return (
-    <div className="contentContainer">
-      <Body />
-    </div>
+    <>
+      <div style={{ paddingLeft: 12, paddingTop: 12 }}>
+        <Typography.Text
+          strong
+          editable={{
+            onChange: (v) => dispatch(updateName(v)),
+          }}
+        >
+          {name}
+        </Typography.Text>
+      </div>
+      <Layout.Content style={{ padding: 12 }}>
+        <div className="contentContainer">
+          <Body />
+        </div>
+      </Layout.Content>
+      <Layout.Content style={{ padding: 12 }}>
+        <div className="contentContainer" style={{ padding: 0 }}>
+          <DataTable />
+        </div>
+      </Layout.Content>
+    </>
+  );
+};
+
+const App: React.FC = () => {
+  const [sidebar, setSidebar] = useState(false);
+
+  const name = useSelector<DataState, string>((s) => s.name);
+
+  return (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Layout.Sider
+        collapsible
+        collapsed={!sidebar}
+        onCollapse={(v) => setSidebar(!v)}
+      >
+        <Menu theme="dark" mode="vertical">
+          <Menu.Item key="1">{name}</Menu.Item>
+        </Menu>
+      </Layout.Sider>
+      <Layout>
+        <DataScreen />
+      </Layout>
+    </Layout>
   );
 };
 
 const Popup: React.FC = () => {
-  const [sidebar, setSidebar] = useState(false);
-
   return (
     <AppProvider>
-      <Layout style={{ minHeight: "100vh" }}>
-        <Layout.Sider
-          collapsible
-          collapsed={!sidebar}
-          onCollapse={(v) => setSidebar(!v)}
-        ></Layout.Sider>
-        <Layout>
-          <div style={{ paddingLeft: 12, paddingTop: 12 }}>Hello</div>
-          <Layout.Content style={{ padding: 12 }}>
-            <AppComponent />
-          </Layout.Content>
-          <Layout.Content style={{ padding: 12 }}>
-            <div className="contentContainer" style={{ padding: 0 }}>
-              <DataTable />
-            </div>
-          </Layout.Content>
-        </Layout>
-      </Layout>
+      <App />
     </AppProvider>
   );
 };

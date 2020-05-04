@@ -31,6 +31,7 @@ export const DataTable: React.FC = () => {
       title: "URL",
       key: "key",
       dataIndex: "key",
+      ellipsis: true,
       render: (id: string) => (
         <a href={id} target="_blank">
           {id.substr(0, 30)}
@@ -61,26 +62,16 @@ export const DataTable: React.FC = () => {
           title: field.label,
           key: field.id,
           dataIndex: field.id,
-          render: (value: string) => (
-            <div
-              style={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                maxWidth: 100,
-              }}
-            >
-              {value}
-            </div>
-          ),
+          ellipsis: true,
         };
       }
     }),
   ];
 
   return (
-    <div>
+    <div style={{overflow: 'scroll'}}>
       <Table
+        scroll={{x: true}}
         onRow={(row) => {
           return {
             onClick: () => dispatch(setCurrentDataId(row.key)),
