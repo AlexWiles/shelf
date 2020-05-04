@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { State, Field, UrlDataByUrl } from "./types";
 import { List } from "immutable";
 import { notUndefined } from "../lib";
-import { Table, Tag as AntdTag } from "antd";
+import { Table, Tag as AntdTag, Rate } from "antd";
 import { setUrl } from "./store";
 
 export const DataTable: React.FC = () => {
@@ -35,7 +35,7 @@ export const DataTable: React.FC = () => {
       dataIndex: "key",
       render: (url: string) => (
         <a href={url} target="_blank">
-          Link
+          {url.substr(0, 30)}
         </a>
       ),
     },
@@ -50,6 +50,13 @@ export const DataTable: React.FC = () => {
               <AntdTag key={tagId}>{field.getTagById(tagId)?.label}</AntdTag>
             ));
           },
+        };
+      } else if (field.get("type") === "rate") {
+        return {
+          title: field.label,
+          key: field.id,
+          dataIndex: field.id,
+          render: (value: number) => <Rate value={value} disabled={true} />,
         };
       } else {
         return {

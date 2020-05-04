@@ -12,7 +12,7 @@ export const AddField = () => {
 
   const [showForm, setShowForm] = useState(false);
 
-  const options: FieldType[] = ["text", "tags", "select"];
+  const options: FieldType[] = ["text", "tags", "select", "rate"];
 
   if (!showForm) {
     return (
@@ -34,7 +34,7 @@ export const AddField = () => {
     return (
       <div>
         <Input
-          style={{ width: 200, marginRight: 5, marginBottom: 5 }}
+          style={{ width: 150, marginRight: 5, marginBottom: 5 }}
           size="small"
           placeholder="label"
           value={label}
@@ -69,10 +69,16 @@ export const AddField = () => {
             const id = uuid();
             dispatch(addField(selectedType, label, id));
             setShowForm(false);
+            setLabel("")
           }}
         >
           + Add field
         </Button>
+        <a href="" onClick={e => {
+          e.preventDefault()
+          setShowForm(false);
+          setLabel("")
+        }} > cancel</a>
       </div>
     );
   }

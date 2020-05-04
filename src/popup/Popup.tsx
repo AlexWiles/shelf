@@ -64,7 +64,7 @@ const Body: React.FC = () => {
     <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex" }}>
-          <div style={{ width: 200, marginRight: 5, marginBottom: 5 }}>URL</div>
+          <div style={{ width: 150, marginRight: 5, marginBottom: 5 }}>URL</div>
           <div
             style={{
               flexGrow: 1,

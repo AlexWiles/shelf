@@ -11,7 +11,7 @@ export type TagsById = Map<string, Tag>;
 
 export type FieldId = string;
 
-export type FieldType = "text" | "tags" | "select";
+export type FieldType = "text" | "tags" | "select" | "rate";
 
 export class Field extends Record<{
   id: FieldId;
@@ -32,17 +32,6 @@ export class Field extends Record<{
     return this.get('tags').find(t => t.label === tagLabel)
   }
 }
-
-export const defaultValueByFieldType = (fieldType: FieldType) => {
-  switch (fieldType) {
-    case "text":
-      return "";
-    case "tags":
-      return [];
-    default:
-      return "";
-  }
-};
 
 export type ValueData = string | OrderedSet<TagId> | number | List<number>;
 
