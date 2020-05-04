@@ -33,8 +33,6 @@ export const TagsInputs: React.FC<{
       const byId = getTagById(field, tag.key || "");
       const byLabel = getTagByLabel(field, String(tag.value) || "");
       const newTag = { id: uuid(), label: String(tag.value) };
-
-      console.log(byId, byLabel, newTag);
       return byId || byLabel || newTag;
     });
 

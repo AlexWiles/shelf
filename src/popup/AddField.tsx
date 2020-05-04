@@ -34,7 +34,6 @@ export const AddField = () => {
       <div>
         <Input
           style={{ width: 150, marginRight: 5, marginBottom: 5 }}
-          size="small"
           placeholder="label"
           value={label}
           onChange={(e) => {
@@ -42,7 +41,6 @@ export const AddField = () => {
           }}
         />
         <Select
-          size="small"
           showSearch
           style={{ width: 150, marginRight: 5, marginBottom: 5 }}
           optionFilterProp="children"
@@ -61,7 +59,6 @@ export const AddField = () => {
         </Select>
         <Button
           style={{ width: 95, marginRight: 5, marginBottom: 5 }}
-          size="small"
           type="primary"
           onClick={(e) => {
             e.preventDefault();

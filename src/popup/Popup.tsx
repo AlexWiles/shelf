@@ -35,14 +35,12 @@ const UrlDisplay: React.FC<{ currentUrl: CurrentDataId }> = ({
 }) => {
   return (
     <div style={{ display: "flex" }}>
-      <div style={{ width: 150, marginRight: 5, marginBottom: 5 }}>URL</div>
+      <div style={{ minWidth: 150, marginRight: 5, marginBottom: 5 }}>URL</div>
       <div
         style={{
-          flexGrow: 1,
           marginRight: 5,
           marginBottom: 5,
           whiteSpace: "nowrap",
-
           overflow: "hidden",
           textOverflow: "ellipsis",
         }}
@@ -164,14 +162,12 @@ const Popup: React.FC = () => {
           onCollapse={(v) => setSidebar(!v)}
         ></Layout.Sider>
         <Layout>
-          <div style={{ paddingLeft: 12, paddingTop: 12 }}>
-            Hello
-          </div>
+          <div style={{ paddingLeft: 12, paddingTop: 12 }}>Hello</div>
           <Layout.Content style={{ padding: 12 }}>
             <AppComponent />
           </Layout.Content>
           <Layout.Content style={{ padding: 12 }}>
-            <div className="contentContainer">
+            <div className="contentContainer" style={{ padding: 0 }}>
               <DataTable />
             </div>
           </Layout.Content>

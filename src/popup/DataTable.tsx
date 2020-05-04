@@ -79,7 +79,7 @@ export const DataTable: React.FC = () => {
   ];
 
   return (
-    <div style={{ marginTop: 20 }}>
+    <div>
       <Table
         onRow={(row) => {
           return {

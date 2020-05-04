@@ -14,9 +14,9 @@ export const TextInput: React.FC<{
   return (
     <div style={{ display: "flex" }} key={field.id}>
       <InputLabel field={field} />
-      <Input.TextArea
+      <Input
+        size="small"
         style={{ width: 250, marginRight: 5, marginBottom: 5 }}
-        autoSize={{ minRows: 1 }}
         value={urlData.values[field.id] ? String(urlData.values[field.id]) : ""}
         onChange={(e) => {
           dispatch(setDataFieldValue(url, field.id, e.target.value));
