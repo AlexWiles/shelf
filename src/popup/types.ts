@@ -11,7 +11,7 @@ export type TagsById = Map<string, Tag>;
 
 export type FieldId = string;
 
-export type FieldType = "text" | "tags";
+export type FieldType = "text" | "tags" | "select";
 
 export class Field extends Record<{
   id: FieldId;
@@ -25,11 +25,11 @@ export class Field extends Record<{
   tags: Set()
 }) {
   getTagById(tagId: TagId): Tag | undefined {
-    return this.tags.find(t => t.id === tagId)
+    return this.get('tags').find(t => t.get('id') === tagId)
   }
 
   getTagByLabel(tagLabel: string): Tag | undefined {
-    return this.tags.find(t => t.label === tagLabel)
+    return this.get('tags').find(t => t.label === tagLabel)
   }
 }
 
