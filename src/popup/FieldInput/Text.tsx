@@ -1,11 +1,11 @@
 import React from "react";
-import { UrlData, Field } from "../types";
+import { Data, Field } from "../../types";
 import { useDispatch } from "react-redux";
 import { Input } from "antd";
-import { setUrlFieldValue } from "../store";
+import { setDataFieldValue } from "../store";
 import { InputLabel } from "./InputLabel";
 
-export const TextInput: React.FC<{ url: string; urlData: UrlData; field: Field }> = ({
+export const TextInput: React.FC<{ url: string; urlData: Data; field: Field }> = ({
   url,
   field,
   urlData,
@@ -23,7 +23,7 @@ export const TextInput: React.FC<{ url: string; urlData: UrlData; field: Field }
             : ""
         }
         onChange={(e) => {
-          dispatch(setUrlFieldValue(url, field.get("id"), e.target.value));
+          dispatch(setDataFieldValue(url, field.get("id"), e.target.value));
         }}
       />
     </div>

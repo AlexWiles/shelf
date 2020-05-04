@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { State, UrlData, Field } from "../types";
+import { DataState, Data, Field } from "../../types";
 import { TextInput } from "./Text";
 import { TagsInputs } from "./Tags";
 import { SelectInput } from "./Select";
@@ -8,14 +8,14 @@ import { RateInput } from "./Rate";
 
 
 export const FieldInput: React.FC<{
-  url: string;
+  id: string;
   fieldId: string;
-}> = ({ url, fieldId }) => {
-  const urlData = useSelector<State, UrlData>(
-    (state) => state.get("urls").get(url) || new UrlData()
+}> = ({ id, fieldId }) => {
+  const urlData = useSelector<DataState, Data>(
+    (state) => state.get("dataById").get(id) || new Data()
   );
 
-  const field = useSelector<State, Field | undefined>((state) =>
+  const field = useSelector<DataState, Field | undefined>((state) =>
     state.get("fieldsById").get(fieldId)
   );
 
@@ -25,13 +25,13 @@ export const FieldInput: React.FC<{
 
   switch (field.get("type")) {
     case "text":
-      return <TextInput url={url} field={field} urlData={urlData} />;
+      return <TextInput url={id} field={field} urlData={urlData} />;
     case "tags":
-      return <TagsInputs url={url} field={field} urlData={urlData} />;
+      return <TagsInputs url={id} field={field} urlData={urlData} />;
     case "select":
-      return <SelectInput url={url} field={field} urlData={urlData} />;
+      return <SelectInput url={id} field={field} urlData={urlData} />;
     case "rate":
-      return <RateInput url={url} field={field} urlData={urlData} />;
+      return <RateInput url={id} field={field} urlData={urlData} />;
     default:
       return <div></div>;
   }

@@ -4,9 +4,9 @@ import "antd/dist/antd.css";
 import "./Popup.scss";
 
 import { Provider, useSelector, useDispatch } from "react-redux";
-import { Button, Layout } from "antd";
-import { store, setUrlData, setUrl } from "./store";
-import { State, UrlData, CurrentUrl } from "./types";
+import { Button, Layout, Breadcrumb } from "antd";
+import { store, setData, setCurrentDataId } from "./store";
+import { DataState, Data, CurrentDataId } from "../types";
 import { uuid } from "../lib";
 import { AddField } from "./AddField";
 import { FieldInput } from "./FieldInput";
@@ -16,8 +16,8 @@ export const AppProvider: React.FC = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
 };
 
-const UrlDataDisplay: React.FC<{ url: string }> = ({ url }) => {
-  const allFields = useSelector<State, List<string>>((state) =>
+const DataDisplay: React.FC<{ id: string }> = ({ id }) => {
+  const allFields = useSelector<DataState, List<string>>((state) =>
     state.get("allFields")
   );
 
@@ -25,7 +25,7 @@ const UrlDataDisplay: React.FC<{ url: string }> = ({ url }) => {
     <div>
       <div>
         {allFields.map((fieldId) => {
-          return <FieldInput url={url} key={fieldId} fieldId={fieldId} />;
+          return <FieldInput id={id} key={fieldId} fieldId={fieldId} />;
         })}
       </div>
       <AddField />
@@ -34,19 +34,19 @@ const UrlDataDisplay: React.FC<{ url: string }> = ({ url }) => {
 };
 
 const Body: React.FC = () => {
-  const currUrl = useSelector<State, CurrentUrl>((state) =>
-    state.get("currentUrl")
+  const currDataid = useSelector<DataState, CurrentDataId>((state) =>
+    state.get("currentDataId")
   );
 
-  const currUrlData = useSelector<State, UrlData | undefined>((state) =>
-    state.get("currentUrl")
-      ? state.get("urls").get(state.get("currentUrl") || "")
+  const currData = useSelector<DataState, Data | undefined>((state) =>
+    state.get("currentDataId")
+      ? state.get("dataById").get(state.get("currentDataId") || "")
       : undefined
   );
 
   const dispatch = useDispatch();
 
-  if (!currUrl) {
+  if (!currDataid) {
     return <div>Please visit a web page in the browser </div>;
   }
 
@@ -66,29 +66,26 @@ const Body: React.FC = () => {
               textOverflow: "ellipsis",
             }}
           >
-            <a href={currUrl} target="_blank">
-              {currUrl}
+            <a href={currDataid} target="_blank">
+              {currDataid}
             </a>
           </div>
         </div>
-        {currUrlData ? (
-          <UrlDataDisplay url={currUrl} />
+        {currData ? (
+          <DataDisplay id={currDataid} />
         ) : (
           <div style={{ display: "flex" }}>
             <Button
               type="primary"
-              size="small"
+              size="large"
               onClick={(e) => {
                 e.preventDefault();
                 dispatch(
-                  setUrlData(
-                    currUrl,
-                    new UrlData({ id: uuid(), values: Map({}) })
-                  )
+                  setData(currDataid, new Data({ id: uuid(), values: Map({}) }))
                 );
               }}
             >
-              save url
+              Save URL
             </Button>
           </div>
         )}
@@ -114,24 +111,23 @@ const getCurrentUrl = (cb: (url: string) => void) => {
 const AppComponent: React.FC = () => {
   const dispatch = useDispatch();
 
-  const currentUrl = useSelector<State, CurrentUrl>((state) =>
-    state.get("currentUrl")
+  const currentDataId = useSelector<DataState, CurrentDataId>((state) =>
+    state.get("currentDataId")
   );
 
   useEffect(() => {
     setInterval(() => {
       getCurrentUrl((url) => {
-        if (!url.startsWith("chrome-extension://") && url !== currentUrl) {
-          dispatch(setUrl(url));
+        if (!url.startsWith("chrome-extension://") && url !== currentDataId) {
+          dispatch(setCurrentDataId(url));
         }
       });
     }, 500);
   });
 
   return (
-    <div className="popupContainer">
+    <div className="contentContainer">
       <Body />
-      <DataTable />
     </div>
   );
 };
@@ -147,9 +143,19 @@ const Popup: React.FC = () => {
           collapsed={!sidebar}
           onCollapse={(v) => setSidebar(!v)}
         ></Layout.Sider>
-        <Layout.Content>
-          <AppComponent />
-        </Layout.Content>
+        <Layout>
+          <div style={{ paddingLeft: 12, paddingTop: 12 }}>
+            <h2>hello</h2>
+          </div>
+          <Layout.Content style={{ padding: 12 }}>
+            <AppComponent />
+          </Layout.Content>
+          <Layout.Content style={{ padding: 12 }}>
+            <div className="contentContainer">
+              <DataTable />
+            </div>
+          </Layout.Content>
+        </Layout>
       </Layout>
     </AppProvider>
   );

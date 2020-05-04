@@ -1,5 +1,5 @@
 import React from "react";
-import { UrlData, Field, Tag } from "../types";
+import { Data, Field, Tag } from "../../types";
 import { useDispatch } from "react-redux";
 import { OrderedSet } from "immutable";
 import { LabeledValue } from "antd/lib/select";
@@ -9,7 +9,7 @@ import { updateValueTags } from "../store";
 import { InputLabel } from "./InputLabel";
 
 
-export const TagsInputs: React.FC<{ url: string; urlData: UrlData; field: Field }> = ({
+export const TagsInputs: React.FC<{ url: string; urlData: Data; field: Field }> = ({
   url,
   urlData,
   field,

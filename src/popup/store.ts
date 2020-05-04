@@ -1,21 +1,21 @@
 import { createStore } from "redux";
 import {
-  UrlData,
+  Data,
   FieldId,
   ValueData,
   FieldType,
-  State,
+  DataState,
   Field,
   Tag,
-} from "./types";
+} from "../types";
 import { Set, List, fromJS } from "immutable";
 
 export type Action =
-  | { type: "SET_URL"; data: { url: string } }
-  | { type: "SET_URL_DATA"; data: { url: string; data: UrlData } }
+  | { type: "SET_CURRENT_DATA_ID"; data: { id: string } }
+  | { type: "SET_DATA"; data: { id: string; data: Data } }
   | {
-      type: "SET_URL_FIELD_VALUE";
-      data: { url: string; fieldId: FieldId; value: ValueData };
+      type: "SET_DATA_FIELD_VALUE";
+      data: { id: string; fieldId: FieldId; value: ValueData };
     }
   | {
       type: "UPDATE_FIELD_LABEL";
@@ -27,26 +27,26 @@ export type Action =
     }
   | {
       type: "UPDATE_VALUE_TAGS";
-      data: { url: string; fieldId: string; tags: Tag[] };
+      data: { id: string; fieldId: string; tags: Tag[] };
     };
 
-export const setUrl = (url: string): Action => ({
-  type: "SET_URL",
-  data: { url },
+export const setCurrentDataId = (id: string): Action => ({
+  type: "SET_CURRENT_DATA_ID",
+  data: { id },
 });
 
-export const setUrlData = (url: string, data: UrlData): Action => ({
-  type: "SET_URL_DATA",
-  data: { url, data },
+export const setData = (id: string, data: Data): Action => ({
+  type: "SET_DATA",
+  data: { id, data },
 });
 
-export const setUrlFieldValue = (
-  url: string,
+export const setDataFieldValue = (
+  id: string,
   fieldId: FieldId,
   value: ValueData
 ): Action => ({
-  type: "SET_URL_FIELD_VALUE",
-  data: { url, fieldId, value },
+  type: "SET_DATA_FIELD_VALUE",
+  data: { id, fieldId, value },
 });
 
 export const updateFieldLabel = (fieldId: string, label: string): Action => ({
@@ -63,26 +63,26 @@ export const addField = (
   data: { fieldType, id: fieldId, label },
 });
 
-export const updateValueTags = (url: string, fieldId: string, tags: Tag[]) => ({
+export const updateValueTags = (id: string, fieldId: string, tags: Tag[]) => ({
   type: "UPDATE_VALUE_TAGS",
   data: {
-    url,
+    id,
     fieldId,
     tags,
   },
 });
 
-export const reducer = (state: State = new State(), action: Action): State => {
+export const reducer = (state: DataState = new DataState(), action: Action): DataState => {
   console.log(state.toJS(), action);
 
   switch (action.type) {
-    case "SET_URL":
-      return state.set("currentUrl", action.data.url);
-    case "SET_URL_DATA":
-      return state.setIn(["urls", action.data.url], action.data.data);
-    case "SET_URL_FIELD_VALUE":
+    case "SET_CURRENT_DATA_ID":
+      return state.set("currentDataId", action.data.id);
+    case "SET_DATA":
+      return state.setIn(["dataById", action.data.id], action.data.data);
+    case "SET_DATA_FIELD_VALUE":
       return state.setIn(
-        ["urls", action.data.url, "values", action.data.fieldId],
+        ["dataById", action.data.id, "values", action.data.fieldId],
         action.data.value
       );
     case "UPDATE_FIELD_LABEL":
@@ -117,7 +117,7 @@ export const reducer = (state: State = new State(), action: Action): State => {
         return state
           .setIn(["fieldsById", newField.id], newField)
           .setIn(
-            ["urls", action.data.url, "values", action.data.fieldId],
+            ["dataById", action.data.id, "values", action.data.fieldId],
             List(action.data.tags.map((t) => t.id))
           );
       } else {
@@ -128,18 +128,18 @@ export const reducer = (state: State = new State(), action: Action): State => {
   }
 };
 
-export const loadState = (): State => {
+export const loadState = (): DataState => {
   try {
     const serializedState = localStorage.getItem("state") || "{}";
-    return fromJS(JSON.parse(serializedState));
+    return new DataState(fromJS(JSON.parse(serializedState)));
   } catch (err) {
-    return new State();
+    return new DataState();
   }
 };
 
-export const saveState = (state: State): void => {
+export const saveState = (state: DataState): void => {
   try {
-    const serializedState = JSON.stringify(state.toObject());
+    const serializedState = JSON.stringify(state.toJS());
     localStorage.setItem("state", serializedState);
   } catch (err) {
     console.log(err);
@@ -150,7 +150,7 @@ export const persistedStore = loadState();
 
 export const store = createStore(
   reducer,
-  // persistedStore,
+  persistedStore,
   (window as any).__REDUX_DEVTOOLS_EXTENSION__ &&
     (window as any).__REDUX_DEVTOOLS_EXTENSION__()
 );

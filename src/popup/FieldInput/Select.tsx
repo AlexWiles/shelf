@@ -1,4 +1,4 @@
-import { Tag, UrlData, Field } from "../types";
+import { Tag, Data, Field } from "../../types";
 import { useDispatch } from "react-redux";
 import { OrderedSet } from "immutable";
 import { LabeledValue } from "antd/lib/select";
@@ -10,7 +10,7 @@ import { InputLabel } from "./InputLabel";
 
 export const SelectInput: React.FC<{
   url: string;
-  urlData: UrlData;
+  urlData: Data;
   field: Field;
 }> = ({ url, urlData, field }) => {
   const dispatch = useDispatch();

@@ -1,28 +1,27 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { State, Field, UrlDataByUrl } from "./types";
+import { DataState, Field, DataById } from "../types";
 import { List } from "immutable";
 import { notUndefined } from "../lib";
 import { Table, Tag as AntdTag, Rate } from "antd";
-import { setUrl } from "./store";
+import { setCurrentDataId } from "./store";
 
 export const DataTable: React.FC = () => {
-  const fields = useSelector<State, List<Field>>((state) => {
+  const fields = useSelector<DataState, List<Field>>((state) => {
     return state
       .get("allFields")
       .map((id) => state.get("fieldsById").get(id))
       .filter((f) => notUndefined(f)) as List<Field>;
   });
 
-  const urls = useSelector<State, UrlDataByUrl>((state) => state.get("urls"));
+  const data = useSelector<DataState, DataById>((state) => state.get("dataById"));
 
   const dispatch = useDispatch();
 
-  const dataSource = urls
-    .entrySeq()
-    .map(([url, data]) => {
+  const dataSource = data.entrySeq()
+    .map(([id, data]) => {
       return {
-        ...{ key: url, id: data.get("id") },
+        ...{ key: id, id: data.get("id") },
         ...data.get("values").toJS(),
       };
     })
@@ -33,9 +32,9 @@ export const DataTable: React.FC = () => {
       title: "URL",
       key: "key",
       dataIndex: "key",
-      render: (url: string) => (
-        <a href={url} target="_blank">
-          {url.substr(0, 30)}
+      render: (id: string) => (
+        <a href={id} target="_blank">
+          {id.substr(0, 30)}
         </a>
       ),
     },
@@ -85,7 +84,7 @@ export const DataTable: React.FC = () => {
       <Table
         onRow={(row) => {
           return {
-            onClick: () => dispatch(setUrl(row.key)),
+            onClick: () => dispatch(setCurrentDataId(row.key)),
           };
         }}
         size="small"

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FieldType } from "./types";
+import { FieldType } from "../types";
 import { useDispatch } from "react-redux";
 import { Input, Select, Button, Typography } from "antd";
 import { addField } from "./store";

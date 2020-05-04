@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography } from "antd";
 import { updateFieldLabel } from "../store";
-import { Field } from "../types";
+import { Field } from "../../types";
 import { useDispatch } from "react-redux";
 
 export const InputLabel: React.FC<{field: Field}> = ({field}) => {
