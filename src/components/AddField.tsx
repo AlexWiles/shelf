@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { FieldType } from "../types";
-import { useDispatch } from "react-redux";
+import { FieldType, AppState, currentBook, Book } from "../types";
+import { useDispatch, useSelector } from "react-redux";
 import { Input, Select, Button, Typography } from "antd";
-import { addField } from "./store";
+import { addField } from "../store";
 import { uuid } from "../lib";
 
 export const AddField = () => {
+  const book = useSelector<AppState, Book | undefined>(currentBook);
+  const dispatch = useDispatch();
+
   const [label, setLabel] = useState<string>("");
   const [selectedType, setSelectedType] = useState<FieldType>("text");
-  const dispatch = useDispatch();
 
   const [showForm, setShowForm] = useState(false);
 
@@ -62,19 +64,27 @@ export const AddField = () => {
           type="primary"
           onClick={(e) => {
             e.preventDefault();
+            if (!book) return;
+
             const id = uuid();
-            dispatch(addField(selectedType, label, id));
+            dispatch(addField(book.id, selectedType, label, id));
             setShowForm(false);
-            setLabel("")
+            setLabel("");
           }}
         >
           + Add field
         </Button>
-        <a href="" onClick={e => {
-          e.preventDefault()
-          setShowForm(false);
-          setLabel("")
-        }} > cancel</a>
+        <a
+          href=""
+          onClick={(e) => {
+            e.preventDefault();
+            setShowForm(false);
+            setLabel("");
+          }}
+        >
+          {" "}
+          cancel
+        </a>
       </div>
     );
   }

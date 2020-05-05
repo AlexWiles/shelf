@@ -1,17 +1,17 @@
-import { Tag, Data, Field, getTagById, getTagByLabel } from "../../types";
+import { Tag, Page, Field, getTagById, getTagByLabel, Book } from "../../types";
 import { useDispatch } from "react-redux";
 import { LabeledValue } from "antd/lib/select";
 import { Select } from "antd";
 import { uuid } from "../../lib";
-import { updateValueTags } from "../store";
+import { updatePageValueTags } from "../../store";
 import React from "react";
 import { InputLabel } from "./InputLabel";
 
 export const SelectInput: React.FC<{
-  url: string;
-  urlData: Data;
+  book: Book;
+  page: Page;
   field: Field;
-}> = ({ url, urlData, field }) => {
+}> = ({ book, field, page }) => {
   const dispatch = useDispatch();
 
   const options: LabeledValue[] = field.tags
@@ -23,8 +23,8 @@ export const SelectInput: React.FC<{
       })
     );
 
-  const urlTagIds = urlData.values[field.id] as string[] || [];
-  const values = options.filter((opt) => urlTagIds.find(id => id == opt.key ));
+  const pageTagIds = page.values[field.id] as string[] || [];
+  const values = options.filter((opt) => pageTagIds.find(id => id == opt.key));
 
   const onChange = (tags: LabeledValue[]): void => {
     const selectedTags = tags.map(
@@ -46,13 +46,13 @@ export const SelectInput: React.FC<{
           });
 
     dispatch(
-      updateValueTags(url, field.id, nextTags)
+      updatePageValueTags(book.id, page.id, field.id, nextTags)
     );
   };
 
   return (
     <div style={{ display: "flex" }} key={field.id}>
-      <InputLabel field={field} />
+      <InputLabel field={field} book={book} />
       <Select
         size="small"
         mode="tags"

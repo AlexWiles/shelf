@@ -1,25 +1,27 @@
 import React from "react";
-import { Data, Field } from "../../types";
+import { Page, Field, Book } from "../../types";
 import { useDispatch } from "react-redux";
 import { Input } from "antd";
-import { setDataFieldValue } from "../store";
+import { setPageFieldValue } from "../../store";
 import { InputLabel } from "./InputLabel";
 
 export const TextInput: React.FC<{
-  url: string;
-  urlData: Data;
+  book: Book;
+  page: Page;
   field: Field;
-}> = ({ url, field, urlData }) => {
+}> = ({ book, field, page }) => {
+
   const dispatch = useDispatch();
+
   return (
     <div style={{ display: "flex" }} key={field.id}>
-      <InputLabel field={field} />
+      <InputLabel field={field} book={book} />
       <Input
         size="small"
         style={{ width: 250, marginRight: 5, marginBottom: 5 }}
-        value={urlData.values[field.id] ? String(urlData.values[field.id]) : ""}
+        value={page.values[field.id] ? String(page.values[field.id]) : ""}
         onChange={(e) => {
-          dispatch(setDataFieldValue(url, field.id, e.target.value));
+          dispatch(setPageFieldValue(book.id, page.id, field.id, e.target.value));
         }}
       />
     </div>

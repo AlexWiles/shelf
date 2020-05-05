@@ -25,12 +25,15 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "@ant-design/icons": "^4.1.0",
+    "@types/uuid": "^7.0.3",
     "antd": "^4.2.0",
     "immer": "^6.0.3",
     "immutable": "^4.0.0-rc.12",
     "moment": "^2.25.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-redux": "^7.2.0"
+    "react-redux": "^7.2.0",
+    "uuid": "^8.0.0"
   }
 }

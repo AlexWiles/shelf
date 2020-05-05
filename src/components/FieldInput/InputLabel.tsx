@@ -1,10 +1,10 @@
 import React from "react";
 import { Typography } from "antd";
-import { updateFieldLabel } from "../store";
-import { Field } from "../../types";
+import { updateBookFieldLabel } from "../../store";
+import { Field, Book } from "../../types";
 import { useDispatch } from "react-redux";
 
-export const InputLabel: React.FC<{field: Field}> = ({field}) => {
+export const InputLabel: React.FC<{book: Book; field: Field}> = ({book, field}) => {
   const dispatch = useDispatch();
 
   return (
@@ -13,7 +13,7 @@ export const InputLabel: React.FC<{field: Field}> = ({field}) => {
         strong
         style={{ width: "100%" }}
         editable={{
-          onChange: (v) => dispatch(updateFieldLabel(field.id, v)),
+          onChange: (v) => dispatch(updateBookFieldLabel(book.id, field.id, v)),
         }}
       >
         {field.label}
