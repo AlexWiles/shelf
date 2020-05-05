@@ -12,7 +12,6 @@ export const TagsInputs: React.FC<{
   page: Page;
   field: Field;
 }> = ({ book, field, page }) => {
-
   const dispatch = useDispatch();
 
   const pageTagIds = (page.values[field.id] as string[]) || [];
@@ -20,7 +19,7 @@ export const TagsInputs: React.FC<{
   const options: LabeledValue[] = field.tags.map(
     (tag): LabeledValue => ({
       key: tag.id,
-      value: tag.label,
+      value: tag.label.toLowerCase(),
       label: tag.label,
     })
   );
@@ -41,24 +40,21 @@ export const TagsInputs: React.FC<{
   };
 
   return (
-    <div style={{ display: "flex" }} key={field.id}>
-      <InputLabel field={field} book={book} />
-      <Select
-        size="small"
-        mode="tags"
-        labelInValue={true}
-        style={{ width: 250, marginRight: 5, marginBottom: 5 }}
-        value={values}
-        onChange={onChange}
-      >
-        {options.map((tag) => {
-          return (
-            <Select.Option key={tag.key} value={tag.value} label={tag.label}>
-              {tag.label}
-            </Select.Option>
-          );
-        })}
-      </Select>
-    </div>
+    <Select
+      size="small"
+      mode="tags"
+      labelInValue={true}
+      style={{ width: 250, marginRight: 5, marginBottom: 5 }}
+      value={values}
+      onChange={onChange}
+    >
+      {options.map((tag) => {
+        return (
+          <Select.Option key={tag.key} value={tag.value} label={tag.label}>
+            {tag.label}
+          </Select.Option>
+        );
+      })}
+    </Select>
   );
 };

@@ -52,6 +52,10 @@ export type Action =
   | {
       type: "UPDATE_PAGE_VALUE_TAGS";
       data: { bookId: string; pageId: string; fieldId: string; tags: Tag[] };
+    }
+  | {
+      type: "DELETE_BOOK_PAGE";
+      data: { bookId: string; pageId: string };
     };
 
 export const newBook = (book: Book): Action => ({
@@ -81,6 +85,11 @@ export const setBookPage = (
 ): Action => ({
   type: "SET_BOOK_PAGE",
   data: { bookId, pageId, page },
+});
+
+export const deleteBookPage = (bookId: string, pageId: string): Action => ({
+  type: "DELETE_BOOK_PAGE",
+  data: { bookId, pageId },
 });
 
 export const setPageFieldValue = (
@@ -162,6 +171,12 @@ export const reducer = (
       return produce(state, (draftState) => {
         const { bookId, pageId, page } = action.data;
         draftState.booksById[bookId].pagesById[pageId] = page;
+      });
+
+    case "DELETE_BOOK_PAGE":
+      return produce(state, (draftState) => {
+        const { bookId, pageId } = action.data;
+        delete draftState.booksById[bookId].pagesById[pageId];
       });
 
     case "SET_PAGE_FIELD_VALUE":

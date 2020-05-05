@@ -10,20 +10,16 @@ export const TextInput: React.FC<{
   page: Page;
   field: Field;
 }> = ({ book, field, page }) => {
-
   const dispatch = useDispatch();
 
   return (
-    <div style={{ display: "flex" }} key={field.id}>
-      <InputLabel field={field} book={book} />
-      <Input
-        size="small"
-        style={{ width: 250, marginRight: 5, marginBottom: 5 }}
-        value={page.values[field.id] ? String(page.values[field.id]) : ""}
-        onChange={(e) => {
-          dispatch(setPageFieldValue(book.id, page.id, field.id, e.target.value));
-        }}
-      />
-    </div>
+    <Input
+      size="small"
+      style={{ width: 250, marginRight: 5, marginBottom: 5 }}
+      value={page.values[field.id] ? String(page.values[field.id]) : ""}
+      onChange={(e) => {
+        dispatch(setPageFieldValue(book.id, page.id, field.id, e.target.value));
+      }}
+    />
   );
 };

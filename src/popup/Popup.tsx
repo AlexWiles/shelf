@@ -18,15 +18,14 @@ import {
   CurrentPageId,
   AppState,
   currentBook,
-  currentPage,
   newBookState,
   ViewingPage,
 } from "../types";
-import { uuid } from "../lib";
 import { AddField } from "../components/AddField";
 import { FieldInput } from "../components/FieldInput";
 import { DataTable } from "../components/DataTable";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, DatabaseOutlined } from "@ant-design/icons";
+import { RemovePage } from "../components/RemovePage";
 
 export const AppProvider: React.FC = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
@@ -102,8 +101,9 @@ const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
           </div>
 
           {page ? (
-            <div>
+            <div style={{display: "flex", justifyContent: "space-between"}}>
               <AddField />
+              <RemovePage bookId={book.id} page={page} />
             </div>
           ) : (
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -129,7 +129,7 @@ const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
   }
 };
 
-const getCurrentUrl = (cb: (url: string) => void) => {
+const getCurrentUrl = (cb: (url: chrome.tabs.Tab) => void) => {
   chrome.tabs.query(
     {
       active: true,
@@ -137,7 +137,7 @@ const getCurrentUrl = (cb: (url: string) => void) => {
     },
     (tab) => {
       if (tab.length > 0) {
-        cb(tab[0].url || "");
+        cb(tab[0]);
       }
     }
   );
@@ -154,8 +154,9 @@ const BookScreen: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      getCurrentUrl((url) => {
-        console.log(url);
+      getCurrentUrl((tab) => {
+        const url = tab.url || "";
+
         if (
           book &&
           !url.startsWith("chrome-extension://") &&
@@ -175,28 +176,29 @@ const BookScreen: React.FC = () => {
   }
 
   return (
-    <>
+    <Layout>
       <div style={{ paddingLeft: 12, paddingTop: 12 }}>
-        <Typography.Text
-          strong
+        <Typography.Title
+          level={4}
+          style={{marginBottom: 0}}
           editable={{
             onChange: (v) => dispatch(updateBookName(book.id, v)),
           }}
         >
           {book.name}
-        </Typography.Text>
+        </Typography.Title>
       </div>
-      <Layout.Content style={{ padding: 12 }}>
+      <Layout.Content style={{ padding: 12, resize: "vertical", flexShrink: 0, flexGrow: 0, height: "35vh" }}>
         <div className="contentContainer">
           <PagePanel book={book} />
         </div>
       </Layout.Content>
-      <Layout.Content style={{ padding: 12 }}>
+      <Layout.Content style={{ padding: 12, flexShrink: 0 }}>
         <div className="contentContainer" style={{ padding: 0 }}>
           <DataTable book={book} />
         </div>
       </Layout.Content>
-    </>
+    </Layout>
   );
 };
 
@@ -219,10 +221,11 @@ const App: React.FC = () => {
     <Layout style={{ minHeight: "100vh" }}>
       <Layout.Sider
         collapsible
+        theme="dark"
         collapsed={!sidebar}
         onCollapse={(v) => setSidebar(!v)}
       >
-        <Menu theme="dark" mode="inline" selectedKeys={[selectedMenuKey]}>
+        <Menu theme="dark" mode="inline" selectedKeys={[selectedMenuKey]} defaultOpenKeys={['books']}>
           <Menu.Item
             key="newBook"
             icon={<PlusOutlined />}
@@ -230,21 +233,24 @@ const App: React.FC = () => {
               dispatch(newBook(newBookState()));
             }}
           >
-            Create App
+            New book
           </Menu.Item>
-          {books.map((book) => {
-            return (
-              <Menu.Item
-                key={book.id}
-                onClick={(e) => dispatch(setCurrentBookId(book.id))}
-              >
-                {book.name}
-              </Menu.Item>
-            );
-          })}
+          <Menu.Divider />
+          <Menu.SubMenu icon={<DatabaseOutlined />}key="books" title="Books">
+            {books.map((book) => {
+              return (
+                <Menu.Item
+                  key={book.id}
+                  onClick={(e) => dispatch(setCurrentBookId(book.id))}
+                >
+                  {book.name}
+                </Menu.Item>
+              );
+            })}
+          </Menu.SubMenu>
         </Menu>
       </Layout.Sider>
-      <Layout>{viewing === "books" ? <BookScreen /> : <div></div>}</Layout>
+      {viewing === "books" ? <BookScreen /> : <Layout></Layout>}
     </Layout>
   );
 };

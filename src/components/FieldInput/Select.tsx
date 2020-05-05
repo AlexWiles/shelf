@@ -14,17 +14,18 @@ export const SelectInput: React.FC<{
 }> = ({ book, field, page }) => {
   const dispatch = useDispatch();
 
-  const options: LabeledValue[] = field.tags
-    .map(
-      (tag): LabeledValue => ({
-        key: tag.id,
-        value: tag.label,
-        label: tag.label,
-      })
-    );
+  const options: LabeledValue[] = field.tags.map(
+    (tag): LabeledValue => ({
+      key: tag.id,
+      value: tag.label,
+      label: tag.label,
+    })
+  );
 
-  const pageTagIds = page.values[field.id] as string[] || [];
-  const values = options.filter((opt) => pageTagIds.find(id => id == opt.key));
+  const pageTagIds = (page.values[field.id] as string[]) || [];
+  const values = options.filter((opt) =>
+    pageTagIds.find((id) => id == opt.key)
+  );
 
   const onChange = (tags: LabeledValue[]): void => {
     const selectedTags = tags.map(
@@ -45,30 +46,25 @@ export const SelectInput: React.FC<{
             return !values.find((v) => v.key === tag.id);
           });
 
-    dispatch(
-      updatePageValueTags(book.id, page.id, field.id, nextTags)
-    );
+    dispatch(updatePageValueTags(book.id, page.id, field.id, nextTags));
   };
 
   return (
-    <div style={{ display: "flex" }} key={field.id}>
-      <InputLabel field={field} book={book} />
-      <Select
-        size="small"
-        mode="tags"
-        labelInValue={true}
-        style={{ width: 250, marginRight: 5, marginBottom: 5 }}
-        value={values}
-        onChange={onChange}
-      >
-        {options.map((tag) => {
-          return (
-            <Select.Option key={tag.key} value={tag.value} label={tag.label}>
-              {tag.label}
-            </Select.Option>
-          );
-        })}
-      </Select>
-    </div>
+    <Select
+      size="small"
+      mode="tags"
+      labelInValue={true}
+      style={{ width: 250, marginRight: 5, marginBottom: 5 }}
+      value={values}
+      onChange={onChange}
+    >
+      {options.map((tag) => {
+        return (
+          <Select.Option key={tag.key} value={tag.value} label={tag.label}>
+            {tag.label}
+          </Select.Option>
+        );
+      })}
+    </Select>
   );
 };

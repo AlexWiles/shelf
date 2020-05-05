@@ -66,7 +66,7 @@ export type Book = {
 
 export const newBookState = (): Book => ({
   id: uuidv4(),
-  name: "New App",
+  name: "New book",
   currentPageId: undefined,
   pagesById: {},
   allFields: [],

@@ -13,20 +13,13 @@ export const RateInput: React.FC<{
   const dispatch = useDispatch();
 
   return (
-    <div style={{ display: "flex" }} key={field.id}>
-      <InputLabel field={field} book={book} />
-      <Rate
-        style={{ width: 250, marginRight: 5, marginBottom: 5 }}
-        allowHalf={true}
-        value={
-          page.values[field.id]
-            ? page.values[field.id] as number
-            : 0
-        }
-        onChange={(value) => {
-          dispatch(setPageFieldValue(book.id, book.id, field.id, value));
-        }}
-      />
-    </div>
+    <Rate
+      style={{ width: 250, marginRight: 5, marginBottom: 5 }}
+      allowHalf={true}
+      value={page.values[field.id] ? (page.values[field.id] as number) : 0}
+      onChange={(value) => {
+        dispatch(setPageFieldValue(book.id, book.id, field.id, value));
+      }}
+    />
   );
 };

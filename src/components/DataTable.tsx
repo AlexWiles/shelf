@@ -1,9 +1,32 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Book, getTagById } from "../types";
+import { Book, getTagById, Field, Page } from "../types";
 import { Table, Tag as AntdTag, Rate, Input } from "antd";
 import { setCurrentPageId } from "../store";
 
+const filterValues = (fields: Field[], page: Page, search: string) => {
+  return fields.find((f) => {
+    const val = page.values[f.id];
+
+    switch (f.type) {
+      case "text":
+        return ((val as undefined | string) || "")
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      case "select":
+      case "tags":
+        return ((val as string[]) || []).find((tagId) => {
+          return f.tags.find(
+            (tag) =>
+              tag.id === tagId &&
+              tag.label.toLowerCase().includes(search.toLowerCase())
+          );
+        });
+    }
+    return;
+  });
+};
 
 export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
   const dispatch = useDispatch();
@@ -14,17 +37,7 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
 
   const dataSource = Object.entries(book.pagesById).reduce(
     (results: any[], [id, page]) => {
-      var ok = false;
-      if (search !== "") {
-        fields.forEach((f) => {
-          const val = page.values[f.id];
-          if (f.type === "text") {
-            ok = ok || (val as string).toLowerCase().includes(search.toLowerCase());
-          }
-        });
-      }
-
-      if (search === "" || ok) {
+      if (search === "" || filterValues(fields, page, search)) {
         const newSource = {
           ...{ key: id, id: page.id },
           ...page.values,
@@ -43,10 +56,19 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
       key: "key",
       dataIndex: "key",
       ellipsis: true,
-      render: (id: string) => (
-        <a href={id} target="_blank">
-          {id.substr(0, 30)}
-        </a>
+      render: (url: string) => (
+        <div
+          style={{
+            maxWidth: 300,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <a href={url} target="_blank">
+            {url.replace(/(^\w+:|^)\/\//, "")}
+          </a>
+        </div>
       ),
     },
     ...fields.map((field) => {
@@ -83,24 +105,29 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
 
   return (
     <div>
-      <div>
-        <Input
-          placeholder="filter"
+      <div style={{ display: "flex", justifyContent: "flex-end", padding: 12 }}>
+        <Input.Search
+          placeholder="Search"
+          size="small"
+          style={{ width: 200 }}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-      <Table
-        scroll={{ x: true }}
-        onRow={(row) => {
-          return {
-            onClick: () => dispatch(setCurrentPageId(book.id, row.key)),
-          };
-        }}
-        size="small"
-        columns={columns}
-        dataSource={dataSource}
-      />
+      <div style={{ padding: 12, paddingTop: 0 }}>
+        <Table
+          bordered
+          scroll={{ x: true }}
+          onRow={(row) => {
+            return {
+              onClick: () => dispatch(setCurrentPageId(book.id, row.key)),
+            };
+          }}
+          size="small"
+          columns={columns}
+          dataSource={dataSource}
+        />
+      </div>
     </div>
   );
 };
