@@ -26,6 +26,7 @@ import { FieldInput } from "../components/FieldInput";
 import { DataTable } from "../components/DataTable";
 import { PlusOutlined, DatabaseOutlined } from "@ant-design/icons";
 import { RemovePage } from "../components/RemovePage";
+import { DropdownEditText } from "../components/DropdownTextEdit";
 
 export const AppProvider: React.FC = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
@@ -101,7 +102,7 @@ const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
           </div>
 
           {page ? (
-            <div style={{display: "flex", justifyContent: "space-between"}}>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
               <AddField />
               <RemovePage bookId={book.id} page={page} />
             </div>
@@ -178,17 +179,30 @@ const BookScreen: React.FC = () => {
   return (
     <Layout>
       <div style={{ paddingLeft: 12, paddingTop: 12 }}>
-        <Typography.Title
-          level={4}
-          style={{marginBottom: 0}}
-          editable={{
-            onChange: (v) => dispatch(updateBookName(book.id, v)),
-          }}
-        >
-          {book.name}
-        </Typography.Title>
+        <div style={{ width: 250 }}>
+          <DropdownEditText
+            text={{
+              value: book.name,
+              onChange: (v) => dispatch(updateBookName(book.id, v)),
+              component: (
+                <Typography.Title level={4} style={{ marginBottom: 0 }}>
+                  {book.name}
+                </Typography.Title>
+              ),
+            }}
+            menuItems={<></>}
+          />
+        </div>
       </div>
-      <Layout.Content style={{ padding: 12, resize: "vertical", flexShrink: 0, flexGrow: 0, height: "35vh" }}>
+      <Layout.Content
+        style={{
+          padding: 12,
+          resize: "vertical",
+          flexShrink: 0,
+          flexGrow: 0,
+          height: "35vh",
+        }}
+      >
         <div className="contentContainer">
           <PagePanel book={book} />
         </div>
@@ -225,7 +239,12 @@ const App: React.FC = () => {
         collapsed={!sidebar}
         onCollapse={(v) => setSidebar(!v)}
       >
-        <Menu theme="dark" mode="inline" selectedKeys={[selectedMenuKey]} defaultOpenKeys={['books']}>
+        <Menu
+          theme="dark"
+          mode="inline"
+          selectedKeys={[selectedMenuKey]}
+          defaultOpenKeys={["books"]}
+        >
           <Menu.Item
             key="newBook"
             icon={<PlusOutlined />}
@@ -236,7 +255,7 @@ const App: React.FC = () => {
             New book
           </Menu.Item>
           <Menu.Divider />
-          <Menu.SubMenu icon={<DatabaseOutlined />}key="books" title="Books">
+          <Menu.SubMenu icon={<DatabaseOutlined />} key="books" title="Books">
             {books.map((book) => {
               return (
                 <Menu.Item

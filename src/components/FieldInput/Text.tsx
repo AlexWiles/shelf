@@ -3,7 +3,6 @@ import { Page, Field, Book } from "../../types";
 import { useDispatch } from "react-redux";
 import { Input } from "antd";
 import { setPageFieldValue } from "../../store";
-import { InputLabel } from "./InputLabel";
 
 export const TextInput: React.FC<{
   book: Book;

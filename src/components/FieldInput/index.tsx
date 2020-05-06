@@ -1,19 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, Children } from "react";
 import { Book, Page, Field } from "../../types";
 import { TextInput } from "./Text";
 import { TagsInputs } from "./Tags";
 import { SelectInput } from "./Select";
 import { RateInput } from "./Rate";
-import { InputLabel } from "./InputLabel";
-import {
-  EllipsisOutlined,
-  InfoOutlined,
-  DownOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
-import { Dropdown, Input, Menu, Typography } from "antd";
+import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { Modal, Dropdown, Input, Menu, Typography } from "antd";
 import { useDispatch } from "react-redux";
-import { updateBookFieldLabel } from "../../store";
+import { updateBookFieldLabel, deleteBookField } from "../../store";
+import { DropdownEditText } from "../DropdownTextEdit";
 
 const ValueInput: React.FC<{
   book: Book;
@@ -39,67 +34,38 @@ const FieldEditIcon: React.FC<{ book: Book; field: Field }> = ({
   field,
 }) => {
   const dispatch = useDispatch();
-  const [visible, setVisible] = useState(false);
-  const [showIcon, setShowIcon] = useState(false);
-
   return (
-    <Dropdown
-      onVisibleChange={setVisible}
-      visible={visible}
-      overlay={
-        <Menu
+    <DropdownEditText
+      text={{
+        component: <Typography.Text strong>{field.label}</Typography.Text>,
+        value: field.label,
+        onChange: (v) => dispatch(updateBookFieldLabel(book.id, field.id, v)),
+      }}
+      menuItems={
+        <Menu.Item
+          icon={
+            <Typography.Text type="danger">
+              <DeleteOutlined />
+            </Typography.Text>
+          }
           onClick={() => {
-            setVisible(true);
+            const modal = Modal.confirm({});
+            modal.update({
+              title: "Are you sure you want to delete this field?",
+              icon: <ExclamationCircleOutlined />,
+              okText: "Yes",
+              cancelText: "No",
+              onOk: () => {
+                dispatch(deleteBookField(book.id, field.id));
+                modal.destroy();
+              },
+            });
           }}
         >
-          <Menu.Item key="name">
-            <Input
-              type="text"
-              value={field.label}
-              onKeyPress={(e) => {
-                switch (e.key) {
-                  case "Enter":
-                    return setVisible(false);
-                }
-              }}
-              onChange={(e) =>
-                dispatch(
-                  updateBookFieldLabel(book.id, field.id, e.target.value)
-                )
-              }
-            />
-          </Menu.Item>
-
-          <Menu.Item
-            icon={
-              <Typography.Text type="danger">
-                <DeleteOutlined />
-              </Typography.Text>
-            }
-          >
-            <Typography.Text type="danger">Delete field</Typography.Text>
-          </Menu.Item>
-        </Menu>
+          <Typography.Text type="danger">Delete field</Typography.Text>
+        </Menu.Item>
       }
-      trigger={["click"]}
-    >
-      <div
-        style={{ width: 150, marginRight: 5, cursor: "pointer" }}
-        onMouseEnter={() => setShowIcon(true)}
-        onMouseLeave={() => {
-          setShowIcon(false);
-        }}
-      >
-        <a className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
-          <Typography.Text strong style={{ marginRight: 5 }}>
-            {field.label}
-          </Typography.Text>
-          <DownOutlined
-            style={{ display: showIcon ? "inline-block" : "none" }}
-          />
-        </a>
-      </div>
-    </Dropdown>
+    />
   );
 };
 

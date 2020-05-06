@@ -5,7 +5,6 @@ import { LabeledValue } from "antd/lib/select";
 import { Select } from "antd";
 import { uuid } from "../../lib";
 import { updatePageValueTags } from "../../store";
-import { InputLabel } from "./InputLabel";
 
 export const TagsInputs: React.FC<{
   book: Book;

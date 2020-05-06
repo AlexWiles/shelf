@@ -5,7 +5,6 @@ import { Select } from "antd";
 import { uuid } from "../../lib";
 import { updatePageValueTags } from "../../store";
 import React from "react";
-import { InputLabel } from "./InputLabel";
 
 export const SelectInput: React.FC<{
   book: Book;

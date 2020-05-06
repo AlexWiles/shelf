@@ -50,6 +50,13 @@ export type Action =
       };
     }
   | {
+      type: "DELETE_BOOK_FIELD";
+      data: {
+        bookId: string;
+        fieldId: string;
+      };
+    }
+  | {
       type: "UPDATE_PAGE_VALUE_TAGS";
       data: { bookId: string; pageId: string; fieldId: string; tags: Tag[] };
     }
@@ -119,6 +126,11 @@ export const addField = (
 ): Action => ({
   type: "ADD_BOOK_FIELD",
   data: { bookId, fieldId, fieldType, label },
+});
+
+export const deleteBookField = (bookId: string, fieldId: string): Action => ({
+  type: "DELETE_BOOK_FIELD",
+  data: { bookId, fieldId },
 });
 
 export const updatePageValueTags = (
@@ -205,6 +217,15 @@ export const reducer = (
         };
 
         draftState.booksById[bookId].fieldsById[action.data.fieldId] = newField;
+      });
+
+    case "DELETE_BOOK_FIELD":
+      return produce(state, (draftState) => {
+        const { bookId, fieldId } = action.data;
+        delete draftState.booksById[bookId].fieldsById[fieldId];
+        draftState.booksById[bookId].allFields = draftState.booksById[
+          bookId
+        ].allFields.filter((fId) => fId !== fieldId);
       });
 
     case "UPDATE_PAGE_VALUE_TAGS":
