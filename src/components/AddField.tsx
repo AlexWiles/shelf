@@ -3,7 +3,7 @@ import { FieldType, AppState, currentBook, Book, FIELD_TYPES } from "../types";
 import { useDispatch, useSelector } from "react-redux";
 import { Input, Select, Button, Typography } from "antd";
 import { addField } from "../store";
-import { uuid } from "../lib";
+import { v4 as uuidv4 } from "uuid";
 
 export const AddField = () => {
   const book = useSelector<AppState, Book | undefined>(currentBook);
@@ -64,7 +64,7 @@ export const AddField = () => {
             e.preventDefault();
             if (!book) return;
 
-            const id = uuid();
+            const id = uuidv4();
             dispatch(addField(book.id, selectedType, label, id));
             setShowForm(false);
             setLabel("");

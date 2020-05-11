@@ -11,7 +11,13 @@ export type TagsById = { [tagId: string]: Tag };
 
 export type FieldId = string;
 
-export type FieldType = "text" | "tags" | "select" | "rate" | "url" | "pageTitle";
+export type FieldType =
+  | "text"
+  | "tags"
+  | "select"
+  | "rate"
+  | "url"
+  | "pageTitle";
 
 export const FIELD_TYPES: FieldType[] = [
   "text",
@@ -68,6 +74,22 @@ export type FieldsById = { [fieldId: string]: Field };
 
 export type PagesById = { [pageId: string]: Page };
 
+export type RowType = {
+  key: string;
+  id: string;
+  [fieldId: string]: ValueData;
+};
+
+export type View = {
+  id: string;
+  search: string;
+  filters?: Record<string, (string | number)[] | null>;
+};
+
+export type ViewId = string;
+
+export type ViewsById = { [viewId: string]: View };
+
 export type Book = {
   id: string;
   name: string;
@@ -75,6 +97,9 @@ export type Book = {
   pagesById: PagesById;
   allFields: FieldId[];
   fieldsById: FieldsById;
+  allViews: ViewId[];
+  viewsById: ViewsById;
+  currentView: ViewId | undefined;
 };
 
 export const newBookState = (): Book => {
@@ -89,6 +114,9 @@ export const newBookState = (): Book => {
     pagesById: { [page.id]: page },
     allFields: [urlField.id, titleField.id],
     fieldsById: { [urlField.id]: urlField, [titleField.id]: titleField },
+    allViews: [],
+    viewsById: {},
+    currentView: undefined,
   };
 };
 

@@ -3,8 +3,8 @@ import { Page, Field, Tag, getTagById, getTagByLabel, Book } from "../../types";
 import { useDispatch } from "react-redux";
 import { LabeledValue } from "antd/lib/select";
 import { Select } from "antd";
-import { uuid } from "../../lib";
 import { updatePageValueTags } from "../../store";
+import { v4 as uuidv4 } from "uuid";
 
 export const TagsInputs: React.FC<{
   book: Book;
@@ -31,7 +31,7 @@ export const TagsInputs: React.FC<{
     const nextTags = tags.map((tag) => {
       const byId = getTagById(field, tag.key || "");
       const byLabel = getTagByLabel(field, String(tag.value) || "");
-      const newTag = { id: uuid(), label: String(tag.value) };
+      const newTag = { id: uuidv4(), label: String(tag.value) };
       return byId || byLabel || newTag;
     });
 
@@ -42,7 +42,7 @@ export const TagsInputs: React.FC<{
     <Select
       size="small"
       mode="tags"
-      style={{width: "100%"}}
+      style={{ width: "100%" }}
       labelInValue={true}
       value={values}
       onChange={onChange}
