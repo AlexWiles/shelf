@@ -63,11 +63,20 @@ export type Action =
   | {
       type: "DELETE_BOOK_PAGE";
       data: { bookId: string; pageId: string };
+    }
+  | {
+      type: "DELETE_BOOK";
+      data: { bookId: string };
     };
 
 export const newBook = (book: Book): Action => ({
   type: "NEW_BOOK",
   data: { book },
+});
+
+export const deleteBook = (bookId: string): Action => ({
+  type: "DELETE_BOOK",
+  data: { bookId },
 });
 
 export const setCurrentBookId = (bookId: string): Action => ({
@@ -162,6 +171,16 @@ export const reducer = (
         draftState.allBookIds.push(book.id);
         draftState.currentBookId = book.id;
       });
+
+    case "DELETE_BOOK":
+      return produce(state, (draftState) => {
+        const { bookId } = action.data;
+        delete draftState.booksById[bookId];
+        draftState.allBookIds = draftState.allBookIds.filter(
+          (bId) => bId !== bookId
+        );
+      });
+
     case "SET_CURRENT_BOOK_ID":
       return produce(state, (draftState) => {
         draftState.currentBookId = action.data.bookId;

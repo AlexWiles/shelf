@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Book, getTagById, Field, Page } from "../types";
-import { Table, Tag as AntdTag, Rate, Input } from "antd";
-import { setCurrentPageId } from "../store";
+import { useDispatch } from "react-redux";
+import { Book, getTagById, Field, Page, ValueData } from "../types";
+import { Table, Tag as AntdTag, Rate, Input, Button } from "antd";
+import { setCurrentPageId, setBookPage, setCurrentBookId } from "../store";
 
 const filterValues = (fields: Field[], page: Page, search: string) => {
   return fields.find((f) => {
     const val = page.values[f.id];
 
     switch (f.type) {
+      case "pageTitle":
       case "text":
         return ((val as undefined | string) || "")
           .toLowerCase()
@@ -28,6 +29,16 @@ const filterValues = (fields: Field[], page: Page, search: string) => {
   });
 };
 
+type RowType = {
+  key: string;
+  id: string;
+  [fieldId: string]: ValueData;
+};
+
+type ViewConfig = {
+  search: string;
+}
+
 export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
   const dispatch = useDispatch();
 
@@ -35,7 +46,8 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
 
   const [search, setSearch] = useState("");
 
-  const dataSource = Object.entries(book.pagesById).reduce(
+
+  const dataSource: RowType[] = Object.entries(book.pagesById).reduce(
     (results: any[], [id, page]) => {
       if (search === "" || filterValues(fields, page, search)) {
         const newSource = {
@@ -50,29 +62,9 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
     []
   );
 
-  const columns = [
-    {
-      title: "URL",
-      key: "key",
-      dataIndex: "key",
-      ellipsis: true,
-      render: (url: string) => (
-        <div
-          style={{
-            maxWidth: 300,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <a href={url} target="_blank">
-            {url.replace(/(^\w+:|^)\/\//, "")}
-          </a>
-        </div>
-      ),
-    },
-    ...fields.map((field) => {
-      if (field.type === "tags" || field.type === "select") {
+  const columns = fields.map((field) => {
+    switch (field.type) {
+      case "tags":
         return {
           title: field.label,
           key: field.id,
@@ -82,33 +74,101 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
               <AntdTag key={tagId}>{getTagById(field, tagId)?.label}</AntdTag>
             ));
           },
+          filterMultiple: true,
+          filters: book.fieldsById[field.id].tags.map((t) => ({
+            text: t.label,
+            value: t.id,
+          })),
+
+          onFilter: (value: any, record: RowType) => {
+            return !!((record[field.id] || [])  as string[]).find(
+              (tagId) => value === tagId
+            );
+          },
         };
-      } else if (field.type === "rate") {
+      case "select":
         return {
           title: field.label,
           key: field.id,
           dataIndex: field.id,
+          render: (tagIds: undefined | string[]) => {
+            return (tagIds || []).map((tagId) => (
+              <AntdTag key={tagId}>{getTagById(field, tagId)?.label}</AntdTag>
+            ));
+          },
+          filterMultiple: false,
+          filters: book.fieldsById[field.id].tags.map((t) => ({
+            text: t.label,
+            value: t.id,
+          })),
+
+          onFilter: (value: any, record: RowType) => {
+            return !!((record[field.id] || [])  as string[]).find(
+              (tagId) => value === tagId
+            );
+          },
+        };
+
+      case "url":
+        return {
+          title: field.label,
+          key: field.id,
+          dataIndex: field.id,
+          ellipsis: true,
+          render: (url: string) =>
+            url ? (
+              <div
+                style={{
+                  maxWidth: 300,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <a href={url} target="_blank">
+                  {url.replace(/(^\w+:|^)\/\//, "")}
+                </a>
+              </div>
+            ) : undefined,
+        };
+
+      case "rate":
+        return {
+          title: field.label,
+          key: field.id,
+          dataIndex: field.id,
+          width: 160,
+          sorter: (a: RowType, b: RowType) => {
+            return Number(a[field.id] || 0) - Number(b[field.id] || 0);
+          },
           render: (value: number) => (
-            <Rate allowHalf={true} value={value} disabled={true} />
+            <div>
+              <Rate allowHalf={true} value={value} disabled={true} />
+            </div>
           ),
         };
-      } else {
+
+      default:
         return {
           title: field.label,
           key: field.id,
           dataIndex: field.id,
           ellipsis: true,
         };
-      }
-    }),
-  ];
+    }
+  });
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "flex-end", padding: 12 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          padding: 12,
+        }}
+      >
         <Input.Search
           placeholder="Search"
-          size="small"
           style={{ width: 200 }}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -117,6 +177,7 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
       <div style={{ padding: 12, paddingTop: 0 }}>
         <Table
           bordered
+          onChange={(pagination, filters,  sorter) => {}}
           scroll={{ x: true }}
           onRow={(row) => {
             return {

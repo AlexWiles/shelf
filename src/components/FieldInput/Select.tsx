@@ -52,8 +52,8 @@ export const SelectInput: React.FC<{
     <Select
       size="small"
       mode="tags"
+      style={{width: "100%"}}
       labelInValue={true}
-      style={{ width: 250, marginRight: 5, marginBottom: 5 }}
       value={values}
       onChange={onChange}
     >

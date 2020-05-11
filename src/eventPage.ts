@@ -19,17 +19,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   return isResponseAsync;
 });
-
-const getCurrentUrl = (cb: (url: string) => void) => {
-  chrome.tabs.query(
-    {
-      active: true,
-      currentWindow: true,
-    },
-    (tab) => {
-      if (tab.length > 0) {
-        cb(tab[0].url || "");
-      }
-    }
-  );
-};

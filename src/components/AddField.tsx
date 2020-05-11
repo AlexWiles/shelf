@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FieldType, AppState, currentBook, Book } from "../types";
+import { FieldType, AppState, currentBook, Book, FIELD_TYPES } from "../types";
 import { useDispatch, useSelector } from "react-redux";
 import { Input, Select, Button, Typography } from "antd";
 import { addField } from "../store";
@@ -13,8 +13,6 @@ export const AddField = () => {
   const [selectedType, setSelectedType] = useState<FieldType>("text");
 
   const [showForm, setShowForm] = useState(false);
-
-  const options: FieldType[] = ["text", "tags", "select", "rate"];
 
   if (!showForm) {
     return (
@@ -53,7 +51,7 @@ export const AddField = () => {
           value={selectedType}
           onChange={(v) => setSelectedType(v as FieldType)}
         >
-          {options.map((ft) => (
+          {FIELD_TYPES.map((ft) => (
             <Select.Option key={ft} value={ft}>
               {ft}
             </Select.Option>

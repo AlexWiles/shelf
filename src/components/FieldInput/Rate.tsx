@@ -13,11 +13,10 @@ export const RateInput: React.FC<{
 
   return (
     <Rate
-      style={{ width: 250, marginRight: 5, marginBottom: 5 }}
       allowHalf={true}
       value={page.values[field.id] ? (page.values[field.id] as number) : 0}
       onChange={(value) => {
-        dispatch(setPageFieldValue(book.id, book.id, field.id, value));
+        dispatch(setPageFieldValue(book.id, page.id, field.id, value));
       }}
     />
   );

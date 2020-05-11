@@ -1,4 +1,4 @@
-import React, { useState, Children } from "react";
+import React from "react";
 import { Book, Page, Field } from "../../types";
 import { TextInput } from "./Text";
 import { TagsInputs } from "./Tags";
@@ -9,6 +9,7 @@ import { Modal, Dropdown, Input, Menu, Typography } from "antd";
 import { useDispatch } from "react-redux";
 import { updateBookFieldLabel, deleteBookField } from "../../store";
 import { DropdownEditText } from "../DropdownTextEdit";
+import { UrlInput } from "./Url";
 
 const ValueInput: React.FC<{
   book: Book;
@@ -16,6 +17,7 @@ const ValueInput: React.FC<{
   field: Field;
 }> = ({ book, page, field }) => {
   switch (field.type) {
+    case "pageTitle":
     case "text":
       return <TextInput {...{ book, page, field }} />;
     case "tags":
@@ -24,6 +26,8 @@ const ValueInput: React.FC<{
       return <SelectInput {...{ book, page, field }} />;
     case "rate":
       return <RateInput {...{ book, page, field }} />;
+    case "url":
+      return <UrlInput {...{ book, page, field }} />;
     default:
       return <div></div>;
   }
@@ -75,11 +79,13 @@ export const FieldInput: React.FC<{
   field: Field;
 }> = ({ book, page, field }) => {
   return (
-    <div style={{ display: "flex", alignItems: "center" }}>
+    <div style={{ display: "flex", alignItems: "center", marginBottom: 5 }}>
       <div style={{ width: 150, marginRight: 5 }}>
         <FieldEditIcon {...{ book, field }} />
       </div>
-      <ValueInput book={book} page={page} field={field} />
+      <div style={{display: 'flex', width: 400}}>
+        <ValueInput book={book} page={page} field={field} />
+      </div>
     </div>
   );
 };

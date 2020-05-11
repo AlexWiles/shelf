@@ -11,7 +11,15 @@ export type TagsById = { [tagId: string]: Tag };
 
 export type FieldId = string;
 
-export type FieldType = "text" | "tags" | "select" | "rate";
+export type FieldType = "text" | "tags" | "select" | "rate" | "url" | "pageTitle";
+
+export const FIELD_TYPES: FieldType[] = [
+  "text",
+  "tags",
+  "select",
+  "rate",
+  "url",
+];
 
 export type Field = {
   id: FieldId;
@@ -19,6 +27,13 @@ export type Field = {
   type: FieldType;
   tags: Tag[];
 };
+
+export const newField = (label: string | undefined, type: FieldType) => ({
+  id: uuidv4(),
+  label: label || "",
+  type,
+  tags: [],
+});
 
 export const getTagById = (field: Field, tagId: TagId): Tag | undefined => {
   return field.tags.find((t) => t.id === tagId);
@@ -38,14 +53,12 @@ export type DataId = string;
 export type ValuesByFieldId = { [fieldId: string]: ValueData };
 
 export type Page = {
-  _id: string;
-  id: DataId;
+  id: string;
   values: ValuesByFieldId;
 };
 
-export const newPage = (url: string): Page => ({
-  _id: uuidv4(),
-  id: url,
+export const newPage = (): Page => ({
+  id: uuidv4(),
   values: {},
 });
 
@@ -64,14 +77,20 @@ export type Book = {
   fieldsById: FieldsById;
 };
 
-export const newBookState = (): Book => ({
-  id: uuidv4(),
-  name: "New book",
-  currentPageId: undefined,
-  pagesById: {},
-  allFields: [],
-  fieldsById: {},
-});
+export const newBookState = (): Book => {
+  const urlField = newField("URL", "url");
+  const titleField = newField("Page title", "pageTitle");
+  const page = newPage();
+
+  return {
+    id: uuidv4(),
+    name: "New book",
+    currentPageId: page.id,
+    pagesById: { [page.id]: page },
+    allFields: [urlField.id, titleField.id],
+    fieldsById: { [urlField.id]: urlField, [titleField.id]: titleField },
+  };
+};
 
 export type BooksById = { [bookId: string]: Book };
 

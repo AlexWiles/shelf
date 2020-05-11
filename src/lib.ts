@@ -21,3 +21,20 @@ Array.prototype.uniqueBy = function (getKey) {
     return !exists;
   });
 }
+
+export const getCurrentUrl = (cb: (url: chrome.tabs.Tab) => void) => {
+  chrome.tabs.query(
+    {
+      active: true,
+    },
+    (tabs) => {
+      console.log(tabs);
+      const tab = tabs.find(
+        (t) => t.url && !t.url.startsWith("chrome-extension://")
+      );
+      if (tab) {
+        cb(tab);
+      }
+    }
+  );
+};
