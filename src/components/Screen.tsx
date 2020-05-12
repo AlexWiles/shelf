@@ -43,7 +43,7 @@ const BookScreen: React.FC = () => {
                 </Typography.Title>
               ),
             }}
-            menuItems={
+            menuItems={[
               <Menu.Item
                 icon={
                   <Typography.Text type="danger">
@@ -65,32 +65,21 @@ const BookScreen: React.FC = () => {
                 }}
               >
                 <Typography.Text type="danger">Delete book</Typography.Text>
-              </Menu.Item>
-            }
+              </Menu.Item>,
+            ]}
           />
 
           <Button
             onClick={(e) => {
               e.preventDefault();
               getCurrentUrl((tab) => {
-                const urlFieldId = book.allFields.find(
-                  (id) => book.fieldsById[id].type === "url"
-                );
-                const pageTitleFieldId = book.allFields.find(
-                  (id) => book.fieldsById[id].type === "pageTitle"
-                );
-                if (urlFieldId && pageTitleFieldId) {
-                  const page = newPage();
-                  page.values[urlFieldId] = tab.url || "";
-                  page.values[pageTitleFieldId] = tab.title || "";
-
-                  dispatch(setBookPage(book.id, page.id, page));
-                  dispatch(setCurrentPageId(book.id, page.id));
-                }
+                const page = newPage();
+                dispatch(setBookPage(book.id, page.id, page));
+                dispatch(setCurrentPageId(book.id, page.id));
               });
             }}
           >
-            + Current URL
+            + New page
           </Button>
         </div>
       </div>
@@ -98,9 +87,10 @@ const BookScreen: React.FC = () => {
         style={{
           padding: 12,
           resize: "vertical",
+          overflow: "hidden",
           flexShrink: 0,
           flexGrow: 0,
-          height: "35vh",
+          height: "50vh",
         }}
       >
         <div className="contentContainer">

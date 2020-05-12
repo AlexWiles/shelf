@@ -9,6 +9,7 @@ import {
   getTagById,
   newAppState,
   AppState,
+  Field,
 } from "./types";
 
 import produce from "immer";
@@ -37,6 +38,23 @@ export type Action =
   | {
       type: "UPDATE_BOOK_FIELD_LABEL";
       data: { bookId: string; fieldId: string; label: string };
+    }
+  | {
+      type: "UPDATE_BOOK_FIELD_FLAG";
+      data: {
+        bookId: string;
+        fieldId: string;
+        flag: "collapsed" | "readOnly";
+        value: boolean;
+      };
+    }
+  | {
+      type: "UPDATE_BOOK_FIELD_TEXT";
+      data: { bookId: string; fieldId: string; text: string };
+    }
+  | {
+      type: "SET_BOOK_FIELD_IDS";
+      data: { bookId: string; fieldIds: string[] };
     }
   | {
       type: "ADD_BOOK_FIELD";
@@ -125,6 +143,33 @@ export const updateBookFieldLabel = (
   data: { bookId, fieldId, label },
 });
 
+export const updateBookFieldFlag = (
+  bookId: string,
+  fieldId: string,
+  flag: "collapsed" | "readOnly",
+  value: boolean
+): Action => ({
+  type: "UPDATE_BOOK_FIELD_FLAG",
+  data: { bookId, fieldId, flag, value},
+});
+
+export const updateBookFieldText = (
+  bookId: string,
+  fieldId: string,
+  text: string
+): Action => ({
+  type: "UPDATE_BOOK_FIELD_TEXT",
+  data: { bookId, fieldId, text },
+});
+
+export const setBookFieldIds = (
+  bookId: string,
+  fieldIds: string[]
+): Action => ({
+  type: "SET_BOOK_FIELD_IDS",
+  data: { bookId, fieldIds },
+});
+
 export const addField = (
   bookId: string,
   fieldType: FieldType,
@@ -159,8 +204,6 @@ export const reducer = (
   state: AppState = newAppState(),
   action: Action
 ): AppState => {
-  console.log(action);
-
   switch (action.type) {
     case "NEW_BOOK":
       return produce(state, (draftState) => {
@@ -220,17 +263,38 @@ export const reducer = (
         draftState.booksById[bookId].fieldsById[fieldId].label = label;
       });
 
+    case "UPDATE_BOOK_FIELD_FLAG":
+      return produce(state, (draftState) => {
+        const { bookId, fieldId, flag, value } = action.data;
+        draftState.booksById[bookId].fieldsById[fieldId][flag] = value;
+      });
+
+    case "UPDATE_BOOK_FIELD_TEXT":
+      return produce(state, (draftState) => {
+        const { bookId, fieldId, text } = action.data;
+        draftState.booksById[bookId].fieldsById[fieldId].text = text;
+      });
+
+    case "SET_BOOK_FIELD_IDS":
+      return produce(state, (draftState) => {
+        const { bookId, fieldIds } = action.data;
+        draftState.booksById[bookId].allFields = fieldIds;
+      });
+
     case "ADD_BOOK_FIELD":
       return produce(state, (draftState) => {
         const { bookId, fieldId, fieldType, label } = action.data;
 
         draftState.booksById[bookId].allFields.push(fieldId);
 
-        const newField = {
+        const newField: Field = {
           id: fieldId,
           type: fieldType,
           label: label,
           tags: [],
+          text: "",
+          collapsed: false,
+          readOnly: false,
         };
 
         draftState.booksById[bookId].fieldsById[action.data.fieldId] = newField;

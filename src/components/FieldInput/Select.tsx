@@ -2,7 +2,7 @@ import React from "react";
 import { Tag, Page, Field, getTagById, getTagByLabel, Book } from "../../types";
 import { useDispatch } from "react-redux";
 import { LabeledValue } from "antd/lib/select";
-import { Select } from "antd";
+import { Select, Tag as AntdTag } from "antd";
 import { updatePageValueTags } from "../../store";
 import { v4 as uuidv4 } from "uuid";
 
@@ -46,6 +46,16 @@ export const SelectInput: React.FC<{
 
     dispatch(updatePageValueTags(book.id, page.id, field.id, nextTags));
   };
+
+  if (field.readOnly) {
+    return (
+      <>
+        {values.map((tag) => {
+          return <AntdTag key={tag.value}>{tag.label}</AntdTag>;
+        })}
+      </>
+    );
+  }
 
   return (
     <Select

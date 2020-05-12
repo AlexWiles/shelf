@@ -1,15 +1,25 @@
 import React from "react";
 import { Book, Page, Field } from "../../types";
-import { TextInput } from "./Text";
+import { TextInput, TextareaInput } from "./Text";
 import { TagsInputs } from "./Tags";
 import { SelectInput } from "./Select";
 import { RateInput } from "./Rate";
-import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-import { Modal, Dropdown, Input, Menu, Typography } from "antd";
+import {
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+  LockOutlined,
+  UnlockOutlined,
+} from "@ant-design/icons";
+import { Modal, Menu, Typography } from "antd";
 import { useDispatch } from "react-redux";
-import { updateBookFieldLabel, deleteBookField } from "../../store";
+import {
+  updateBookFieldLabel,
+  deleteBookField,
+  updateBookFieldFlag,
+} from "../../store";
 import { DropdownEditText } from "../DropdownTextEdit";
 import { UrlInput } from "./Url";
+import { CodeInput } from "./Code";
 
 const ValueInput: React.FC<{
   book: Book;
@@ -17,9 +27,12 @@ const ValueInput: React.FC<{
   field: Field;
 }> = ({ book, page, field }) => {
   switch (field.type) {
-    case "pageTitle":
     case "text":
       return <TextInput {...{ book, page, field }} />;
+    case "textarea":
+      return <TextareaInput {...{ book, page, field }} />;
+    case "code":
+      return <CodeInput {...{ book, page, field }} />;
     case "tags":
       return <TagsInputs {...{ book, page, field }} />;
     case "select":
@@ -41,12 +54,39 @@ const FieldEditIcon: React.FC<{ book: Book; field: Field }> = ({
   return (
     <DropdownEditText
       text={{
-        component: <Typography.Text strong>{field.label}</Typography.Text>,
+        component: (
+          <Typography.Text strong>
+            {field.label} {field.readOnly ? <LockOutlined /> : undefined}
+          </Typography.Text>
+        ),
         value: field.label,
         onChange: (v) => dispatch(updateBookFieldLabel(book.id, field.id, v)),
       }}
-      menuItems={
+      menuItems={[
         <Menu.Item
+          key="readOnly"
+          icon={
+            <Typography.Text>
+              {field.readOnly ? <LockOutlined /> : <UnlockOutlined />}
+            </Typography.Text>
+          }
+          onClick={() => {
+            dispatch(
+              updateBookFieldFlag(
+                book.id,
+                field.id,
+                "readOnly",
+                !field.readOnly
+              )
+            );
+          }}
+        >
+          <Typography.Text>
+            {field.readOnly ? "Unlock" : "Lock"}
+          </Typography.Text>
+        </Menu.Item>,
+        <Menu.Item
+          key="delete"
           icon={
             <Typography.Text type="danger">
               <DeleteOutlined />
@@ -67,8 +107,8 @@ const FieldEditIcon: React.FC<{ book: Book; field: Field }> = ({
           }}
         >
           <Typography.Text type="danger">Delete field</Typography.Text>
-        </Menu.Item>
-      }
+        </Menu.Item>,
+      ]}
     />
   );
 };
@@ -79,11 +119,11 @@ export const FieldInput: React.FC<{
   field: Field;
 }> = ({ book, page, field }) => {
   return (
-    <div style={{ display: "flex", alignItems: "center", marginBottom: 5 }}>
-      <div style={{ width: 150, marginRight: 5 }}>
+    <div style={{ display: "flex", alignItems: "top", marginBottom: 5 }}>
+      <div style={{ flex: "0 0 150px", marginRight: 5 }}>
         <FieldEditIcon {...{ book, field }} />
       </div>
-      <div style={{display: 'flex', width: 400}}>
+      <div style={{ display: "flex", flexGrow: 1 }}>
         <ValueInput book={book} page={page} field={field} />
       </div>
     </div>

@@ -13,6 +13,7 @@ export const RateInput: React.FC<{
 
   return (
     <Rate
+      disabled={field.readOnly}
       allowHalf={true}
       value={page.values[field.id] ? (page.values[field.id] as number) : 0}
       onChange={(value) => {

@@ -10,7 +10,7 @@ const filterValues = (fields: Field[], page: Page, search: string) => {
     const val = page.values[f.id];
 
     switch (f.type) {
-      case "pageTitle":
+      case "textarea":
       case "text":
         return ((val as undefined | string) || "")
           .toLowerCase()
@@ -34,8 +34,6 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
   const dispatch = useDispatch();
   const fields = book.allFields.map((fieldId) => book.fieldsById[fieldId]);
   const [view, setView] = useState<View>({ id: "asdf", search: "" });
-
-  console.log(view);
 
   const dataSource: RowType[] = Object.entries(book.pagesById).reduce(
     (results: any[], [id, page]) => {

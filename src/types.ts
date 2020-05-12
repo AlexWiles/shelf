@@ -17,14 +17,17 @@ export type FieldType =
   | "select"
   | "rate"
   | "url"
-  | "pageTitle";
+  | "code"
+  | "textarea";
 
-export const FIELD_TYPES: FieldType[] = [
-  "text",
-  "tags",
-  "select",
-  "rate",
-  "url",
+export const FIELD_TYPES: {value: FieldType, label: string}[] = [
+  {value: "text", label: "Text"},
+  {value: "textarea", label: "Text area"},
+  {value: "tags", label: "Tags"},
+  {value: "select", label: "Select"},
+  {value: "rate", label: "Stars"},
+  {value: "url", label: "URL"},
+  {value: "code", label: "Code"},
 ];
 
 export type Field = {
@@ -32,13 +35,22 @@ export type Field = {
   label: string;
   type: FieldType;
   tags: Tag[];
+  text: string;
+  collapsed: boolean;
+  readOnly: boolean;
 };
 
-export const newField = (label: string | undefined, type: FieldType) => ({
+export const newField = (
+  label: string | undefined,
+  type: FieldType
+): Field => ({
   id: uuidv4(),
   label: label || "",
   type,
   tags: [],
+  text: "",
+  collapsed: false,
+  readOnly: false
 });
 
 export const getTagById = (field: Field, tagId: TagId): Tag | undefined => {
@@ -51,6 +63,8 @@ export const getTagByLabel = (
 ): Tag | undefined => {
   return field.tags.find((t) => t.label === tagLabel);
 };
+
+export const newTag = (value: string) => ( { id: uuidv4(), label: value })
 
 export type ValueData = string | string[] | number | number[];
 
@@ -102,9 +116,16 @@ export type Book = {
   currentView: ViewId | undefined;
 };
 
+export const getFieldIdByLabel = (
+  book: Book,
+  label: string
+): string | undefined => {
+  return book.allFields.find(
+    (fieldId) => book.fieldsById[fieldId].label === label
+  );
+};
+
 export const newBookState = (): Book => {
-  const urlField = newField("URL", "url");
-  const titleField = newField("Page title", "pageTitle");
   const page = newPage();
 
   return {
@@ -112,8 +133,8 @@ export const newBookState = (): Book => {
     name: "New book",
     currentPageId: page.id,
     pagesById: { [page.id]: page },
-    allFields: [urlField.id, titleField.id],
-    fieldsById: { [urlField.id]: urlField, [titleField.id]: titleField },
+    allFields: [],
+    fieldsById: {},
     allViews: [],
     viewsById: {},
     currentView: undefined,

@@ -47,6 +47,7 @@ export const UrlInput: React.FC<{
     >
       <Input
         size="small"
+        disabled={field.readOnly}
         value={page.values[field.id] ? String(page.values[field.id]) : ""}
         onChange={(e) => {
           dispatch(

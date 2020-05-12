@@ -31,7 +31,7 @@ export const AddField = () => {
     );
   } else {
     return (
-      <div>
+      <div style={{ display: "flex" }}>
         <Input
           style={{ width: 150, marginRight: 5, marginBottom: 5 }}
           placeholder="label"
@@ -51,14 +51,14 @@ export const AddField = () => {
           value={selectedType}
           onChange={(v) => setSelectedType(v as FieldType)}
         >
-          {FIELD_TYPES.map((ft) => (
-            <Select.Option key={ft} value={ft}>
-              {ft}
+          {FIELD_TYPES.map(({ value, label }) => (
+            <Select.Option key={value} value={value}>
+              {label}
             </Select.Option>
           ))}
         </Select>
         <Button
-          style={{ width: 95, marginRight: 5, marginBottom: 5 }}
+          style={{ width: 95, marginRight: 8, marginBottom: 5 }}
           type="primary"
           onClick={(e) => {
             e.preventDefault();
@@ -72,17 +72,19 @@ export const AddField = () => {
         >
           + Add field
         </Button>
-        <a
-          href=""
-          onClick={(e) => {
-            e.preventDefault();
-            setShowForm(false);
-            setLabel("");
-          }}
-        >
-          {" "}
-          cancel
-        </a>
+        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 2}}>
+          <a
+            href=""
+            onClick={(e) => {
+              e.preventDefault();
+              setShowForm(false);
+              setLabel("");
+            }}
+          >
+            {" "}
+            cancel
+          </a>
+        </div>
       </div>
     );
   }

@@ -1,27 +1,51 @@
-import { Book, newPage, CurrentPageId, Page } from "../types";
-import { useDispatch } from "react-redux";
+import { Book, Page } from "../types";
 import React from "react";
 import { AddField } from "./AddField";
 import { RemovePage } from "./RemovePage";
-import { Button } from "antd";
-import { setBookPage } from "../store";
 import FieldInput from "./FieldInput";
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
+import { useDispatch } from "react-redux";
+import { setBookFieldIds } from "../store";
+import { arrMove } from "../lib";
 
-const DataDisplay: React.FC<{ book: Book; page: Page }> = ({ book, page }) => {
+const SortableItem = SortableElement(
+  ({ fieldId, book, page }: { fieldId: string; book: Book; page: Page }) => (
+    <FieldInput book={book} page={page} field={book.fieldsById[fieldId]} />
+  )
+);
+
+const Data = SortableContainer(({ book, page }: { book: Book; page: Page }) => {
   return (
     <div>
-      <div>
-        {book.allFields.map((fieldId) => {
-          return (
-            <FieldInput
-              key={fieldId}
-              book={book}
-              page={page}
-              field={book.fieldsById[fieldId]}
-            />
-          );
-        })}
-      </div>
+      {book.allFields.map((fieldId, index) => {
+        return (
+          <SortableItem
+            key={fieldId}
+            fieldId={fieldId}
+            index={index}
+            book={book}
+            page={page}
+          />
+        );
+      })}
+    </div>
+  );
+});
+
+const DataDisplay: React.FC<{ book: Book; page: Page }> = ({ book, page }) => {
+  const dispatch = useDispatch();
+
+  return (
+    <div>
+      <Data
+        book={book}
+        page={page}
+        distance={1}
+        onSortEnd={({ oldIndex, newIndex }) => {
+          const newFieldIdsOrder = arrMove(book.allFields, oldIndex, newIndex);
+          dispatch(setBookFieldIds(book.id, newFieldIdsOrder));
+        }}
+      />
     </div>
   );
 };
@@ -52,11 +76,17 @@ export const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
           </div>
 
           {page ? (
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+              }}
+            >
               <AddField />
               <RemovePage bookId={book.id} page={page} />
             </div>
-          ) : undefined }
+          ) : undefined}
         </div>
       </div>
     );

@@ -1,7 +1,8 @@
 import React, { useState, ReactNode } from "react";
-import { useDispatch } from "react-redux";
-import { Dropdown, Menu, Input, Typography } from "antd";
-import { DeleteOutlined, DownOutlined } from "@ant-design/icons";
+import { Dropdown, Menu, Input } from "antd";
+import {
+  MenuOutlined,
+} from "@ant-design/icons";
 
 export const DropdownEditText: React.FC<{
   text: {
@@ -9,11 +10,9 @@ export const DropdownEditText: React.FC<{
     value: string;
     onChange: (value: string) => void;
   };
-  menuItems: ReactNode;
+  menuItems: ReactNode[];
 }> = ({ text, menuItems }) => {
-  const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
-  const [showIcon, setShowIcon] = useState(false);
 
   return (
     <Dropdown
@@ -21,11 +20,6 @@ export const DropdownEditText: React.FC<{
       visible={visible}
       overlay={
         <Menu
-          onClick={({ item, key }) => {
-            if (key !== "name") {
-              setVisible(false);
-            }
-          }}
         >
           <Menu.Item
             key="name"
@@ -52,22 +46,18 @@ export const DropdownEditText: React.FC<{
     >
       <div
         style={{ cursor: "pointer" }}
-        onMouseEnter={() => setShowIcon(true)}
-        onMouseLeave={() => {
-          setShowIcon(false);
-        }}
       >
         <a
           onClick={(e) => e.preventDefault()}
-          style={{ display: "flex", alignItems: "center" }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+          }}
         >
-          {text.component}
-          <DownOutlined
-            style={{
-              marginLeft: 5,
-              display: showIcon ? "inline-block" : "none",
-            }}
+          <MenuOutlined
+            style={{ marginRight: 5, color: "rgba(217,217,217)" }}
           />
+          {text.component}
         </a>
       </div>
     </Dropdown>
