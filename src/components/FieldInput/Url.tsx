@@ -37,6 +37,17 @@ export const UrlInput: React.FC<{
 }> = ({ book, field, page }) => {
   const dispatch = useDispatch();
 
+  if (field.readOnly) {
+    return (
+      <a
+        target="_blank"
+        href={(page.values[field.id] as string | undefined) || ""}
+      >
+        {(page.values[field.id] as string | undefined) || ""}
+      </a>
+    );
+  }
+
   return (
     <div
       style={{
