@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Dispatch, useState, useRef } from "react";
 import {
   Page,
   Field,
@@ -38,6 +38,45 @@ const fieldsByLabelJSON = (book: Book) => {
   );
 };
 
+const compileFieldCode = (book: Book, page: Page, field: Field) => {
+  const code = `
+    const _VALS = ${pageValuesToJSON(book, page)};
+    const _FIELD_IDS = ${fieldsByLabelJSON(book)};
+    const getValue = (label) => _VALS[label];
+    const g = (l) => getValue(l);
+    const setValue = (label, value) => {
+      window.top.postMessage({type: "SET_VALUE", fieldId: _FIELD_IDS[label], value: value})
+    };
+    const s = (l, v) => setValue(l, v);
+    ${field.text}`;
+
+  return transform(code, {}).code || "";
+};
+
+const handleMessage = (
+  book: Book,
+  page: Page,
+  dispatch: Dispatch<any>,
+  event: MessageEvent
+) => {
+  const action = event.data;
+  switch (action.type) {
+    case "SET_VALUE":
+      if (action.fieldId) {
+        const field = book.fieldsById[action.fieldId];
+        if (field.type === "select") {
+          const tagLabel = action.value as string;
+          const tag = getTagByLabel(field, tagLabel) || newTag(tagLabel);
+          dispatch(updatePageValueTags(book.id, page.id, field.id, [tag]));
+        } else {
+          dispatch(
+            setPageFieldValue(book.id, page.id, action.fieldId, action.value)
+          );
+        }
+      }
+  }
+};
+
 export const CodeInput: React.FC<{
   book: Book;
   page: Page;
@@ -46,30 +85,8 @@ export const CodeInput: React.FC<{
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const listener = (event: MessageEvent) => {
-      const action = event.data;
-      switch (action.type) {
-        case "SET_VALUE":
-          if (action.fieldId) {
-            const field = book.fieldsById[action.fieldId];
-            if (field.type === "select") {
-              const tagLabel = action.value as string;
-              const tag = getTagByLabel(field, tagLabel) || newTag(tagLabel);
-              dispatch(updatePageValueTags(book.id, page.id, field.id, [tag]));
-            } else {
-              dispatch(
-                setPageFieldValue(
-                  book.id,
-                  page.id,
-                  action.fieldId,
-                  action.value
-                )
-              );
-            }
-          }
-      }
-    };
-
+    const listener = (event: MessageEvent) =>
+      handleMessage(book, page, dispatch, event);
     window.addEventListener("message", listener);
     return () => window.removeEventListener("message", listener);
   }, [book, dispatch, page]);
@@ -121,19 +138,9 @@ export const CodeInput: React.FC<{
         <Button
           onClick={(e) => {
             e.preventDefault();
-            const code = `
-              const _VALS = ${pageValuesToJSON(
-                book,
-                page
-              )}; const _FIELD_IDS = ${fieldsByLabelJSON(
-              book
-            )}; const getValue = (label) => _VALS[label]; const setValue = (label, value) => window.postMessage({type: "SET_VALUE", fieldId: _FIELD_IDS[label], value: value});
-              ${field.text}`;
-
             try {
-              const transpiled = transform(code, {});
-              console.log(transpiled);
-              eval(transpiled.code || "");
+              const transpiled = compileFieldCode(book, page, field);
+              eval(transpiled);
             } catch (err) {
               alert(err);
             }

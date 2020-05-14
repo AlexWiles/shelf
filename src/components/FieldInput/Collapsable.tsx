@@ -38,7 +38,7 @@ export const Collapsable: React.FC<CollapsableProps> = ({
     >
       {children}
 
-      <div style={{ position: "absolute", right: 10, bottom: 5 }}>
+      <div style={{ position: "absolute", right: 10, top: 5 }}>
         {collapsed ? (
           <CaretDownOutlined onClick={() => onCollapse(false)} />
         ) : (
