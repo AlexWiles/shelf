@@ -20,6 +20,7 @@ import {
 import { DropdownEditText } from "../DropdownTextEdit";
 import { UrlInput } from "./Url";
 import { CodeInput } from "./Code";
+import { CheckboxInput } from "./Checkbox";
 
 const ValueInput: React.FC<{
   book: Book;
@@ -41,6 +42,8 @@ const ValueInput: React.FC<{
       return <RateInput {...{ book, page, field }} />;
     case "url":
       return <UrlInput {...{ book, page, field }} />;
+    case "checkbox":
+      return <CheckboxInput {...{ book, page, field }} />;
     default:
       return <div></div>;
   }

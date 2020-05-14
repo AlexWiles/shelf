@@ -49,7 +49,7 @@ export const DropdownEditText: React.FC<{
           alignItems: "center",
         }}
       >
-        <MenuOutlined style={{ marginRight: 5, color: "rgba(217,217,217)" }} />
+        <MenuOutlined style={{ marginRight: 8, color: "rgba(217,217,217)" }} />
         {text.component}
       </div>
     </Dropdown>

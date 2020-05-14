@@ -18,16 +18,18 @@ export type FieldType =
   | "rate"
   | "url"
   | "code"
-  | "textarea";
+  | "textarea"
+  | "checkbox";
 
-export const FIELD_TYPES: {value: FieldType, label: string}[] = [
-  {value: "text", label: "Text"},
-  {value: "textarea", label: "Text area"},
-  {value: "tags", label: "Tags"},
-  {value: "select", label: "Select"},
-  {value: "rate", label: "Stars"},
-  {value: "url", label: "URL"},
-  {value: "code", label: "Code"},
+export const FIELD_TYPES: { value: FieldType; label: string }[] = [
+  { value: "text", label: "Text" },
+  { value: "textarea", label: "Text area" },
+  { value: "tags", label: "Tags" },
+  { value: "select", label: "Select" },
+  { value: "rate", label: "Stars" },
+  { value: "url", label: "URL" },
+  { value: "code", label: "Code" },
+  { value: "checkbox", label: "Checkbox" },
 ];
 
 export type Field = {
@@ -50,7 +52,7 @@ export const newField = (
   tags: [],
   text: "",
   collapsed: false,
-  readOnly: false
+  readOnly: false,
 });
 
 export const getTagById = (field: Field, tagId: TagId): Tag | undefined => {
@@ -61,12 +63,14 @@ export const getTagByLabel = (
   field: Field,
   tagLabel: string
 ): Tag | undefined => {
-  return field.tags.find((t) => t.label === tagLabel);
+  return field.tags.find(
+    (t) => t.label.toLowerCase() === tagLabel.toLowerCase()
+  );
 };
 
-export const newTag = (value: string) => ( { id: uuidv4(), label: value })
+export const newTag = (value: string) => ({ id: uuidv4(), label: value });
 
-export type ValueData = string | string[] | number | number[];
+export type ValueData = string | string[] | number | number[] | boolean;
 
 export type DataId = string;
 

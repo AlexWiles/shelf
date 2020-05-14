@@ -205,6 +205,7 @@ export const reducer = (
   state: AppState = newAppState(),
   action: Action
 ): AppState => {
+  console.log(action);
   switch (action.type) {
     case "NEW_BOOK":
       return produce(state, (draftState) => {

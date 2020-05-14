@@ -1,4 +1,4 @@
-import React, { useEffect, Dispatch, useState, useRef } from "react";
+import React, { useEffect, Dispatch } from "react";
 import {
   Page,
   Field,
@@ -8,7 +8,7 @@ import {
   ValueData,
 } from "../../types";
 import { useDispatch } from "react-redux";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import {
   updateBookFieldText,
   updateBookFieldFlag,
@@ -59,19 +59,44 @@ const handleMessage = (
   dispatch: Dispatch<any>,
   event: MessageEvent
 ) => {
-  const action = event.data;
+  const action: { type: "SET_VALUE"; fieldId: string; value: ValueData } =
+    event.data;
   switch (action.type) {
     case "SET_VALUE":
       if (action.fieldId) {
         const field = book.fieldsById[action.fieldId];
-        if (field.type === "select") {
-          const tagLabel = action.value as string;
-          const tag = getTagByLabel(field, tagLabel) || newTag(tagLabel);
-          dispatch(updatePageValueTags(book.id, page.id, field.id, [tag]));
-        } else {
-          dispatch(
-            setPageFieldValue(book.id, page.id, action.fieldId, action.value)
-          );
+        switch (field.type) {
+          case "select":
+            return (() => {
+              const tagLabel = action.value as string;
+              const tag = getTagByLabel(field, tagLabel) || newTag(tagLabel);
+              return dispatch(
+                updatePageValueTags(book.id, page.id, field.id, [tag])
+              );
+            })();
+          case "tags":
+            return (() => {
+              if (
+                !Array.isArray(action.value) ||
+                ((action.value as unknown) as string[]).find(
+                  (v) => typeof v !== "string"
+                )
+              ) {
+                throw new Error(`invalid tags value for ${field.label}`);
+              }
+
+              const tagLabels = action.value as string[];
+              const tags = tagLabels.map((tagLabel) => {
+                return getTagByLabel(field, tagLabel) || newTag(tagLabel);
+              });
+              return dispatch(
+                updatePageValueTags(book.id, page.id, field.id, tags)
+              );
+            })();
+          default:
+            return dispatch(
+              setPageFieldValue(book.id, page.id, action.fieldId, action.value)
+            );
         }
       }
   }
@@ -85,8 +110,13 @@ export const CodeInput: React.FC<{
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const listener = (event: MessageEvent) =>
-      handleMessage(book, page, dispatch, event);
+    const listener = (event: MessageEvent) => {
+      try {
+        handleMessage(book, page, dispatch, event);
+      } catch (err) {
+        alert(err);
+      }
+    };
     window.addEventListener("message", listener);
     return () => window.removeEventListener("message", listener);
   }, [book, dispatch, page]);

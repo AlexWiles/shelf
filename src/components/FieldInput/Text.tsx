@@ -23,7 +23,6 @@ export const TextInput: React.FC<{
   return (
     <Input
       disabled={field.readOnly}
-      size="small"
       value={page.values[field.id] ? String(page.values[field.id]) : ""}
       onChange={(e) => {
         dispatch(setPageFieldValue(book.id, page.id, field.id, e.target.value));

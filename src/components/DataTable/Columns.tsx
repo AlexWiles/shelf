@@ -1,6 +1,6 @@
 import React from "react";
 import { Field, getTagById, Book, View, RowType } from "../../types";
-import { Tag as AntdTag, Rate } from "antd";
+import { Tag as AntdTag, Rate, Checkbox } from "antd";
 
 export const columnData = (book: Book, fields: Field[], view: View) =>
   fields
@@ -90,6 +90,27 @@ export const columnData = (book: Book, fields: Field[], view: View) =>
                 <Rate allowHalf={true} value={value} disabled={true} />
               </div>
             ),
+          };
+        case "checkbox":
+          return {
+            title: field.label,
+            key: field.id,
+            dataIndex: field.id,
+            width: 100,
+            render: (value: boolean) => (
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <Checkbox checked={value} onChange={() => {}} />
+              </div>
+            ),
+            filterValue: (view.filters || {})[field.id],
+            filterMultiple: false,
+            filters: [
+              { text: "Checked", value: true },
+              { text: "Unchecked", value: false },
+            ],
+            onFilter: (value: any, record: RowType) => {
+              return (record[field.id] as boolean) === value;
+            },
           };
 
         default:

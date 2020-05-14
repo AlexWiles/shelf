@@ -59,7 +59,6 @@ export const SelectInput: React.FC<{
 
   return (
     <Select
-      size="small"
       mode="tags"
       style={{ width: "100%" }}
       labelInValue={true}

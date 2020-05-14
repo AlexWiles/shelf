@@ -51,7 +51,6 @@ export const TagsInputs: React.FC<{
   return (
     <Select
       disabled={field.readOnly}
-      size="small"
       mode="tags"
       style={{ width: "100%" }}
       labelInValue={true}
