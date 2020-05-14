@@ -26,7 +26,6 @@ const filterValues = (fields: Field[], page: Page, search: string) => {
           );
         });
     }
-    return;
   });
 };
 

@@ -69,7 +69,7 @@ export const columnData = (book: Book, fields: Field[], view: View) =>
                     whiteSpace: "nowrap",
                   }}
                 >
-                  <a href={url} target="_blank">
+                  <a href={url} target="_blank" rel="noopener noreferrer">
                     {url.replace(/(^\w+:|^)\/\//, "")}
                   </a>
                 </div>

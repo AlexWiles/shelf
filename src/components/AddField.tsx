@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FieldType, AppState, currentBook, Book, FIELD_TYPES } from "../types";
 import { useDispatch, useSelector } from "react-redux";
-import { Input, Select, Button, Typography } from "antd";
+import { Input, Select, Button } from "antd";
 import { addField } from "../store";
 import { v4 as uuidv4 } from "uuid";
 
@@ -72,19 +72,17 @@ export const AddField = () => {
         >
           + Add field
         </Button>
-        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 2}}>
-          <a
-            href=""
-            onClick={(e) => {
-              e.preventDefault();
-              setShowForm(false);
-              setLabel("");
-            }}
-          >
-            {" "}
-            cancel
-          </a>
-        </div>
+        <Button
+          danger
+          style={{ width: 95, marginRight: 8, marginBottom: 5 }}
+          onClick={(e) => {
+            e.preventDefault();
+            setShowForm(false);
+            setLabel("");
+          }}
+        >
+          Cancel
+        </Button>
       </div>
     );
   }

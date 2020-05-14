@@ -1,8 +1,6 @@
 import React, { useState, ReactNode } from "react";
 import { Dropdown, Menu, Input } from "antd";
-import {
-  MenuOutlined,
-} from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
 
 export const DropdownEditText: React.FC<{
   text: {
@@ -19,8 +17,7 @@ export const DropdownEditText: React.FC<{
       onVisibleChange={setVisible}
       visible={visible}
       overlay={
-        <Menu
-        >
+        <Menu>
           <Menu.Item
             key="name"
             onClick={() => {
@@ -45,20 +42,15 @@ export const DropdownEditText: React.FC<{
       trigger={["click"]}
     >
       <div
-        style={{ cursor: "pointer" }}
+        onClick={(e) => e.preventDefault()}
+        style={{
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+        }}
       >
-        <a
-          onClick={(e) => e.preventDefault()}
-          style={{
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <MenuOutlined
-            style={{ marginRight: 5, color: "rgba(217,217,217)" }}
-          />
-          {text.component}
-        </a>
+        <MenuOutlined style={{ marginRight: 5, color: "rgba(217,217,217)" }} />
+        {text.component}
       </div>
     </Dropdown>
   );

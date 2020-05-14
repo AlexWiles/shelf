@@ -23,7 +23,7 @@ export const SelectInput: React.FC<{
 
   const pageTagIds = (page.values[field.id] as string[]) || [];
   const values = options.filter((opt) =>
-    pageTagIds.find((id) => id == opt.key)
+    pageTagIds.find((id) => id === opt.key)
   );
 
   const onChange = (tags: LabeledValue[]): void => {

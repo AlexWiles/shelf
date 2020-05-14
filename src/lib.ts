@@ -10,31 +10,14 @@ declare global {
   }
 }
 
-Array.prototype.uniqueBy = function (getKey) {
+export const uniqueBy = <T>(arr: T[], getKey: (obj: T) => string) => {
   const flags: { [flag: string]: true } = {};
 
-  return this.filter((obj) => {
+  return arr.filter((obj) => {
     const exists = flags[getKey(obj)];
     flags[getKey(obj)] = true;
     return !exists;
   });
-};
-
-export const getCurrentUrl = (cb: (url: chrome.tabs.Tab) => void) => {
-  chrome.tabs.query(
-    {
-      active: true,
-    },
-    (tabs) => {
-      console.log(tabs);
-      const tab = tabs.find(
-        (t) => t.url && !t.url.startsWith("chrome-extension://")
-      );
-      if (tab) {
-        cb(tab);
-      }
-    }
-  );
 };
 
 export const arrRemove = <T>(arr: T[], idx: number): T[] => [
@@ -61,5 +44,5 @@ export const useDebounced = (
   useEffect(() => {
     const timeout = setTimeout(func, delay);
     return () => clearTimeout(timeout);
-  }, dependencyArray);
+  }, [func, delay, ...dependencyArray]);
 };

@@ -13,6 +13,7 @@ import {
 } from "./types";
 
 import produce from "immer";
+import { uniqueBy } from "./lib";
 
 export type Action =
   | { type: "NEW_BOOK"; data: { book: Book } }
@@ -150,7 +151,7 @@ export const updateBookFieldFlag = (
   value: boolean
 ): Action => ({
   type: "UPDATE_BOOK_FIELD_FLAG",
-  data: { bookId, fieldId, flag, value},
+  data: { bookId, fieldId, flag, value },
 });
 
 export const updateBookFieldText = (
@@ -324,11 +325,15 @@ export const reducer = (
           ...newTags,
         ];
 
-        draftState.booksById[bookId].fieldsById[
-          fieldId
-        ].tags = nextTags.uniqueBy((t) => t.id);
+        draftState.booksById[bookId].fieldsById[fieldId].tags = uniqueBy(
+          nextTags,
+          (t) => t.id
+        );
 
-        const dataTagIds = tags.map((t) => t.id).uniqueBy((s) => s);
+        const dataTagIds = uniqueBy(
+          tags.map((t) => t.id),
+          (s) => s
+        );
 
         draftState.booksById[bookId].pagesById[pageId].values[
           fieldId

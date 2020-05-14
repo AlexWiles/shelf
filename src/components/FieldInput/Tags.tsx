@@ -1,5 +1,5 @@
 import React from "react";
-import { Page, Field, Tag, getTagById, getTagByLabel, Book } from "../../types";
+import { Page, Field, getTagById, getTagByLabel, Book } from "../../types";
 import { useDispatch } from "react-redux";
 import { LabeledValue } from "antd/lib/select";
 import { Select, Tag as AntdTag } from "antd";

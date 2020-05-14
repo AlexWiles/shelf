@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Page, Field, Book } from "../../types";
 import { useDispatch } from "react-redux";
 import { Input, Typography } from "antd";
 import { setPageFieldValue, updateBookFieldFlag } from "../../store";
-import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 import { Collapsable } from "./Collapsable";
 
 export const TextInput: React.FC<{

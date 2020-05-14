@@ -1,59 +1,63 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import {
   Page,
   Field,
   Book,
   getFieldIdByLabel,
-  ValueData,
   getTagByLabel,
   newTag,
 } from "../../types";
 import { useDispatch } from "react-redux";
 import { Button } from "antd";
 import {
-  setPageFieldValue,
   updateBookFieldText,
-  updatePageValueTags,
   updateBookFieldFlag,
+  updatePageValueTags,
+  setPageFieldValue,
 } from "../../store";
 import Editor from "react-simple-code-editor";
 import Prism, * as prism from "prismjs";
 import "prismjs/themes/prism.css";
-import { CaretUpOutlined, CaretDownOutlined } from "@ant-design/icons";
 import { Collapsable } from "./Collapsable";
 
 export const CodeInput: React.FC<{
   book: Book;
   page: Page;
   field: Field;
-}> = ({ book, field, page }) => {
+}> = ({ book, page, field }) => {
   const dispatch = useDispatch();
 
   const getValue = (label: string) => {
     const fieldId = getFieldIdByLabel(book, label);
     if (fieldId) {
       return page.values[fieldId];
-    } else {
-      throw `No field ${label}`;
     }
   };
 
-  const setValue = (label: string, value: ValueData): void => {
-    const fieldId = getFieldIdByLabel(book, label);
-
-    if (fieldId) {
-      const field = book.fieldsById[fieldId];
-      if (field.type === "select") {
-        const tagLabel = value as string;
-        const tag = getTagByLabel(field, tagLabel) || newTag(tagLabel);
-        dispatch(updatePageValueTags(book.id, page.id, field.id, [tag]));
-      } else {
-        dispatch(setPageFieldValue(book.id, page.id, fieldId, value));
+  useEffect(() => {
+    const listener = (event: MessageEvent) => {
+      const action = event.data;
+      switch (action.type) {
+        case "SET_VALUE":
+          const fieldId = getFieldIdByLabel(book, action.label);
+          if (fieldId) {
+            const field = book.fieldsById[fieldId];
+            if (field.type === "select") {
+              const tagLabel = action.value as string;
+              const tag = getTagByLabel(field, tagLabel) || newTag(tagLabel);
+              dispatch(updatePageValueTags(book.id, page.id, field.id, [tag]));
+            } else {
+              dispatch(
+                setPageFieldValue(book.id, page.id, fieldId, action.value)
+              );
+            }
+          }
       }
-    } else {
-      throw `No field ${label}`;
-    }
-  };
+    };
+
+    window.addEventListener("message", listener);
+    return () => window.removeEventListener("message", listener);
+  }, [book, dispatch, page]);
 
   const buttonStyle: React.CSSProperties = field.collapsed
     ? { marginLeft: 5 }

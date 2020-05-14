@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Provider, useSelector, useDispatch } from "react-redux";
 import { Layout, Typography, Menu, Modal, Button } from "antd";
 import {
@@ -14,13 +14,12 @@ import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { DropdownEditText } from "./DropdownTextEdit";
 import { PagePanel } from "./PagePanel";
 import { Sidebar } from "./Sidebar";
-import { getCurrentUrl } from "../lib";
 
 export const AppProvider: React.FC = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
 };
 
-const BookScreen: React.FC = () => {
+export const BookScreen: React.FC = () => {
   const dispatch = useDispatch();
 
   const book = useSelector(currentBook);
@@ -38,13 +37,18 @@ const BookScreen: React.FC = () => {
               value: book.name,
               onChange: (v) => dispatch(updateBookName(book.id, v)),
               component: (
-                <Typography.Title level={4} style={{ marginBottom: 0 }}>
+                <Typography.Title
+                  key={book.id}
+                  level={4}
+                  style={{ marginBottom: 0 }}
+                >
                   {book.name}
                 </Typography.Title>
               ),
             }}
             menuItems={[
               <Menu.Item
+                key={book.id}
                 icon={
                   <Typography.Text type="danger">
                     <DeleteOutlined />
@@ -72,11 +76,9 @@ const BookScreen: React.FC = () => {
           <Button
             onClick={(e) => {
               e.preventDefault();
-              getCurrentUrl((tab) => {
-                const page = newPage();
-                dispatch(setBookPage(book.id, page.id, page));
-                dispatch(setCurrentPageId(book.id, page.id));
-              });
+              const page = newPage();
+              dispatch(setBookPage(book.id, page.id, page));
+              dispatch(setCurrentPageId(book.id, page.id));
             }}
           >
             + New page
