@@ -50,6 +50,14 @@ export type Action =
       };
     }
   | {
+      type: "UPDATE_BOOK_FIELD_COLUMN_WIDTH";
+      data: {
+        bookId: string;
+        fieldId: string;
+        width: number;
+      };
+    }
+  | {
       type: "UPDATE_BOOK_FIELD_TEXT";
       data: { bookId: string; fieldId: string; text: string };
     }
@@ -152,6 +160,15 @@ export const updateBookFieldFlag = (
 ): Action => ({
   type: "UPDATE_BOOK_FIELD_FLAG",
   data: { bookId, fieldId, flag, value },
+});
+
+export const updateBookFieldColumnWidth = (
+  bookId: string,
+  fieldId: string,
+  width: number
+): Action => ({
+  type: "UPDATE_BOOK_FIELD_COLUMN_WIDTH",
+  data: { bookId, fieldId, width },
 });
 
 export const updateBookFieldText = (
@@ -269,6 +286,12 @@ export const reducer = (
       return produce(state, (draftState) => {
         const { bookId, fieldId, flag, value } = action.data;
         draftState.booksById[bookId].fieldsById[fieldId][flag] = value;
+      });
+
+    case "UPDATE_BOOK_FIELD_COLUMN_WIDTH":
+      return produce(state, (draftState) => {
+        const { bookId, fieldId, width } = action.data;
+        draftState.booksById[bookId].fieldsById[fieldId].tableColumnWidth = width;
       });
 
     case "UPDATE_BOOK_FIELD_TEXT":

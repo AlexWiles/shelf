@@ -40,6 +40,7 @@ export type Field = {
   text: string;
   collapsed: boolean;
   readOnly: boolean;
+  tableColumnWidth?: number;
 };
 
 export const newField = (

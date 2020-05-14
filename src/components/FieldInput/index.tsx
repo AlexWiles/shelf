@@ -56,6 +56,7 @@ const FieldEditIcon: React.FC<{ book: Book; field: Field }> = ({
   const dispatch = useDispatch();
   return (
     <DropdownEditText
+      iconStyle={{cursor: 'grab'}}
       text={{
         component: (
           <Typography.Text strong>

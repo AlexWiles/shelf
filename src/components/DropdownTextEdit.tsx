@@ -9,7 +9,8 @@ export const DropdownEditText: React.FC<{
     onChange: (value: string) => void;
   };
   menuItems: ReactNode[];
-}> = ({ text, menuItems }) => {
+  iconStyle?: React.CSSProperties;
+}> = ({ text, menuItems, iconStyle = {} }) => {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -49,7 +50,12 @@ export const DropdownEditText: React.FC<{
           alignItems: "center",
         }}
       >
-        <MenuOutlined style={{ marginRight: 8, color: "rgba(217,217,217)" }} />
+        <MenuOutlined
+          style={{
+            ...{ marginRight: 8, color: "rgba(217,217,217)" },
+            ...iconStyle,
+          }}
+        />
         {text.component}
       </div>
     </Dropdown>
