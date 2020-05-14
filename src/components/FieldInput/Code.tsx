@@ -3,9 +3,9 @@ import {
   Page,
   Field,
   Book,
-  getFieldIdByLabel,
   getTagByLabel,
   newTag,
+  ValueData,
 } from "../../types";
 import { useDispatch } from "react-redux";
 import { Button } from "antd";
@@ -19,6 +19,24 @@ import Editor from "react-simple-code-editor";
 import Prism, * as prism from "prismjs";
 import "prismjs/themes/prism.css";
 import { Collapsable } from "./Collapsable";
+import { transform } from "@babel/standalone";
+
+const pageValuesToJSON = (book: Book, page: Page) => {
+  const obj = book.allFields.reduce((obj, fieldId) => {
+    const label = book.fieldsById[fieldId].label;
+    return { ...obj, ...{ [label]: page.values[fieldId] } };
+  }, {} as { [label: string]: ValueData });
+
+  return JSON.stringify(obj);
+};
+
+const fieldsByLabelJSON = (book: Book) => {
+  return JSON.stringify(
+    book.allFields.reduce((obj, fieldId) => {
+      return { ...obj, ...{ [book.fieldsById[fieldId].label]: fieldId } };
+    }, {} as { [label: string]: string })
+  );
+};
 
 export const CodeInput: React.FC<{
   book: Book;
@@ -27,28 +45,25 @@ export const CodeInput: React.FC<{
 }> = ({ book, page, field }) => {
   const dispatch = useDispatch();
 
-  const getValue = (label: string) => {
-    const fieldId = getFieldIdByLabel(book, label);
-    if (fieldId) {
-      return page.values[fieldId];
-    }
-  };
-
   useEffect(() => {
     const listener = (event: MessageEvent) => {
       const action = event.data;
       switch (action.type) {
         case "SET_VALUE":
-          const fieldId = getFieldIdByLabel(book, action.label);
-          if (fieldId) {
-            const field = book.fieldsById[fieldId];
+          if (action.fieldId) {
+            const field = book.fieldsById[action.fieldId];
             if (field.type === "select") {
               const tagLabel = action.value as string;
               const tag = getTagByLabel(field, tagLabel) || newTag(tagLabel);
               dispatch(updatePageValueTags(book.id, page.id, field.id, [tag]));
             } else {
               dispatch(
-                setPageFieldValue(book.id, page.id, fieldId, action.value)
+                setPageFieldValue(
+                  book.id,
+                  page.id,
+                  action.fieldId,
+                  action.value
+                )
               );
             }
           }
@@ -60,11 +75,17 @@ export const CodeInput: React.FC<{
   }, [book, dispatch, page]);
 
   const buttonStyle: React.CSSProperties = field.collapsed
-    ? { marginLeft: 5 }
+    ? { marginRight: 5 }
     : { marginTop: 5 };
 
   return (
-    <div style={{ flexGrow: 1, display: field.collapsed ? "flex" : "block" }}>
+    <div
+      style={{
+        flexGrow: 1,
+        display: field.collapsed ? "flex" : "block",
+        flexDirection: "row-reverse",
+      }}
+    >
       <Collapsable
         style={{
           border: "1px solid rgb(217,217,217)",
@@ -94,13 +115,28 @@ export const CodeInput: React.FC<{
       <div
         style={{
           ...buttonStyle,
-          ...{ display: "flex", justifyContent: "flex-end" },
+          ...{ display: "flex" },
         }}
       >
         <Button
           onClick={(e) => {
             e.preventDefault();
-            eval(field.text);
+            const code = `
+              const _VALS = ${pageValuesToJSON(
+                book,
+                page
+              )}; const _FIELD_IDS = ${fieldsByLabelJSON(
+              book
+            )}; const getValue = (label) => _VALS[label]; const setValue = (label, value) => window.postMessage({type: "SET_VALUE", fieldId: _FIELD_IDS[label], value: value});
+              ${field.text}`;
+
+            try {
+              const transpiled = transform(code, {});
+              console.log(transpiled);
+              eval(transpiled.code || "");
+            } catch (err) {
+              alert(err);
+            }
           }}
         >
           Execute
