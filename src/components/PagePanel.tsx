@@ -1,7 +1,6 @@
 import { Book, Page } from "../types";
 import React from "react";
 import { AddField } from "./AddField";
-import { RemovePage } from "./RemovePage";
 import FieldInput from "./FieldInput";
 import { SortableContainer, SortableElement } from "react-sortable-hoc";
 import { useDispatch } from "react-redux";
@@ -59,8 +58,8 @@ export const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
         style={{
           display: "flex",
           flexDirection: "column",
-          width: "100%",
-          height: "100%",
+          minWidth: "100%",
+          minHeight: "100%",
         }}
       >
         <div
@@ -73,6 +72,7 @@ export const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
         >
           <div>
             {page ? <DataDisplay book={book} page={page} /> : undefined}
+            <AddField />
           </div>
 
           {page ? (
@@ -83,8 +83,6 @@ export const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
                 alignItems: "baseline",
               }}
             >
-              <AddField />
-              <RemovePage bookId={book.id} page={page} />
             </div>
           ) : undefined}
         </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Book, Page, Field } from "../../types";
-import { TextInput, TextareaInput } from "./Text";
+import { TextInput, TextareaInput, TextareaInputDisplay } from "./Text";
 import { TagsInputs } from "./Tags";
 import { SelectInput } from "./Select";
 import { RateInput } from "./Rate";
@@ -21,6 +21,7 @@ import { DropdownEditText } from "../DropdownTextEdit";
 import { UrlInput } from "./Url";
 import { CodeInput } from "./Code";
 import { CheckboxInput } from "./Checkbox";
+import { DatetimeInput } from "./Datetime";
 
 const ValueInput: React.FC<{
   book: Book;
@@ -31,7 +32,7 @@ const ValueInput: React.FC<{
     case "text":
       return <TextInput {...{ book, page, field }} />;
     case "textarea":
-      return <TextareaInput {...{ book, page, field }} />;
+      return <TextareaInputDisplay {...{ book, page, field }} />;
     case "code":
       return <CodeInput {...{ book, page, field }} />;
     case "tags":
@@ -44,6 +45,8 @@ const ValueInput: React.FC<{
       return <UrlInput {...{ book, page, field }} />;
     case "checkbox":
       return <CheckboxInput {...{ book, page, field }} />;
+    case "datetime":
+      return <DatetimeInput {...{ book, page, field }} />;
     default:
       return <div></div>;
   }

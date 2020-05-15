@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Book, Field, Page, View, RowType } from "../../types";
 import { Table, Input } from "antd";
-import { setCurrentPageId, updateBookFieldColumnWidth } from "../../store";
+import { updateBookFieldColumnWidth } from "../../store";
 import { columnData } from "./Columns";
 import { Resizable } from "react-resizable";
 
@@ -16,7 +16,7 @@ const Header: React.FC<{ field: Field; book: Book; lastColumn: boolean }> = (
   );
 
   if (props.lastColumn) {
-    return <th {...props} />;
+    return <th {...props} ></th>;
   }
 
   return (
@@ -44,7 +44,7 @@ const Header: React.FC<{ field: Field; book: Book; lastColumn: boolean }> = (
         setWidth(size.width);
       }}
       onResizeStop={() => {
-        if (width) {
+        if (width && props?.field?.id) {
           dispatch(
             updateBookFieldColumnWidth(props.book.id, props.field.id, width)
           );
@@ -90,8 +90,7 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
     (results: any[], [id, page]) => {
       if (view.search === "" || filterValues(fields, page, view.search)) {
         const newSource = {
-          ...{ key: id, id: page.id },
-          ...page.values,
+          ...{ key: id, id: page.id, page }
         };
         results.push(newSource);
       }
@@ -101,7 +100,7 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
     []
   );
 
-  const columns = columnData(book, fields, view);
+  const columns = columnData(book, fields, view, dispatch);
 
   return (
     <div>
@@ -125,12 +124,6 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
           components={{ header: { cell: Header } }}
           onChange={(pagination, filters, sorter) => {
             setView({ ...view, ...{ pagination, filters, sorter } });
-          }}
-          scroll={{ x: true }}
-          onRow={(row) => {
-            return {
-              onClick: () => dispatch(setCurrentPageId(book.id, row.key)),
-            };
           }}
           size="small"
           columns={columns}

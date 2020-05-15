@@ -1,4 +1,4 @@
-import React, { useEffect, Dispatch } from "react";
+import React, { useEffect, Dispatch, useState } from "react";
 import {
   Page,
   Field,
@@ -8,7 +8,7 @@ import {
   ValueData,
 } from "../../types";
 import { useDispatch } from "react-redux";
-import { Button, message } from "antd";
+import { Button } from "antd";
 import {
   updateBookFieldText,
   updateBookFieldFlag,
@@ -20,6 +20,7 @@ import Prism, * as prism from "prismjs";
 import "prismjs/themes/prism.css";
 import { Collapsable } from "./Collapsable";
 import { transform } from "@babel/standalone";
+import { v4 } from "uuid";
 
 const pageValuesToJSON = (book: Book, page: Page) => {
   const obj = book.allFields.reduce((obj, fieldId) => {
@@ -38,14 +39,21 @@ const fieldsByLabelJSON = (book: Book) => {
   );
 };
 
-const compileFieldCode = (book: Book, page: Page, field: Field) => {
+const compileFieldCode = (
+  book: Book,
+  page: Page,
+  field: Field,
+  sourceId: string
+) => {
   const code = `
     const _VALS = ${pageValuesToJSON(book, page)};
     const _FIELD_IDS = ${fieldsByLabelJSON(book)};
     const getValue = (label) => _VALS[label];
     const g = (l) => getValue(l);
     const setValue = (label, value) => {
-      window.top.postMessage({type: "SET_VALUE", fieldId: _FIELD_IDS[label], value: value})
+      window.top.postMessage({type: "SET_VALUE", sourceFieldId: "${
+        field.id
+      }", sourceId: "${sourceId}", fieldId: _FIELD_IDS[label],  value: value})
     };
     const s = (l, v) => setValue(l, v);
     ${field.text}`;
@@ -56,14 +64,26 @@ const compileFieldCode = (book: Book, page: Page, field: Field) => {
 const handleMessage = (
   book: Book,
   page: Page,
+  field: Field,
+  sourceId: string,
   dispatch: Dispatch<any>,
   event: MessageEvent
 ) => {
-  const action: { type: "SET_VALUE"; fieldId: string; value: ValueData } =
-    event.data;
+  const action: {
+    type: "SET_VALUE";
+    fieldId: string;
+    value: ValueData;
+    sourceId: string;
+    sourceFieldId: string;
+  } = event.data;
+
   switch (action.type) {
     case "SET_VALUE":
-      if (action.fieldId) {
+      if (
+        action.fieldId &&
+        action.sourceId === sourceId &&
+        action.sourceFieldId === field.id
+      ) {
         const field = book.fieldsById[action.fieldId];
         switch (field.type) {
           case "select":
@@ -102,24 +122,51 @@ const handleMessage = (
   }
 };
 
-export const CodeInput: React.FC<{
+export const ExecuteCodeButton: React.FC<{
   book: Book;
   page: Page;
   field: Field;
 }> = ({ book, page, field }) => {
   const dispatch = useDispatch();
 
+  const [sourceId] = useState(v4());
+
   useEffect(() => {
     const listener = (event: MessageEvent) => {
       try {
-        handleMessage(book, page, dispatch, event);
+        handleMessage(book, page, field, sourceId, dispatch, event);
       } catch (err) {
         alert(err);
       }
     };
     window.addEventListener("message", listener);
     return () => window.removeEventListener("message", listener);
-  }, [book, dispatch, page]);
+  }, [book, field, dispatch, sourceId, page]);
+
+  return (
+    <Button
+      onClick={(e) => {
+        e.preventDefault();
+        try {
+          const transpiled = compileFieldCode(book, page, field, sourceId);
+          eval(transpiled);
+        } catch (err) {
+          console.log(err);
+          alert(err);
+        }
+      }}
+    >
+      {field.label}
+    </Button>
+  );
+};
+
+export const CodeInput: React.FC<{
+  book: Book;
+  page: Page;
+  field: Field;
+}> = ({ book, page, field }) => {
+  const dispatch = useDispatch();
 
   const buttonStyle: React.CSSProperties = field.collapsed
     ? { marginRight: 5 }
@@ -165,19 +212,7 @@ export const CodeInput: React.FC<{
           ...{ display: "flex" },
         }}
       >
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            try {
-              const transpiled = compileFieldCode(book, page, field);
-              eval(transpiled);
-            } catch (err) {
-              alert(err);
-            }
-          }}
-        >
-          Execute
-        </Button>
+        <ExecuteCodeButton book={book} page={page} field={field} />
       </div>
     </div>
   );

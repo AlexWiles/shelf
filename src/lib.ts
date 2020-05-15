@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function notUndefined<T>(x: T | undefined): x is T {
   return x !== undefined;
@@ -45,4 +45,27 @@ export const useDebounced = (
     const timeout = setTimeout(func, delay);
     return () => clearTimeout(timeout);
   }, [func, delay, ...dependencyArray]);
+};
+
+export const useClickOutside = (
+  callback: () => void,
+  watcher: any[]
+): React.MutableRefObject<any> => {
+  const ref = useRef<any>(null);
+
+  const handleClick = (event: MouseEvent): void => {
+    if (ref.current && !ref.current.contains(event.target as Node)) {
+      callback();
+    }
+  };
+
+  const effect = () => {
+    document.addEventListener("mousedown", handleClick);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+    };
+  };
+
+  useEffect(effect, watcher);
+  return ref;
 };

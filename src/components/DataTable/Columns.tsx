@@ -1,12 +1,18 @@
-import React from "react";
-import { Field, getTagById, Book, View, RowType } from "../../types";
-import { Tag as AntdTag, Rate, Checkbox } from "antd";
+import React, { Dispatch, useState } from "react";
+import { Field, getTagById, Book, View, RowType, Page } from "../../types";
+import { Tag as AntdTag, Button } from "antd";
+import { RateInput } from "../FieldInput/Rate";
+import { CheckboxInput } from "../FieldInput/Checkbox";
+import { ArrowsAltOutlined, EllipsisOutlined } from "@ant-design/icons";
+import { setCurrentPageId } from "../../store";
+import { TagsInputs, TagsInputDisplay } from "../FieldInput/Tags";
+import { ExecuteCodeButton } from "../FieldInput/Code";
+import { DatetimeInput } from "../FieldInput/Datetime";
+
 
 const tagColumn = (book: Book, field: Field, view: View) => ({
-  render: (tagIds: undefined | string[]) => {
-    return (tagIds || []).map((tagId) => (
-      <AntdTag key={tagId}>{getTagById(field, tagId)?.label}</AntdTag>
-    ));
+  render: (tagIds: undefined | string[], record: RowType) => {
+    return <TagsInputDisplay book={book} page={record.page} field={field} />;
   },
   filterValue: (view.filters || {})[field.id],
   filterMultiple: true,
@@ -15,7 +21,7 @@ const tagColumn = (book: Book, field: Field, view: View) => ({
     value: t.id,
   })),
   onFilter: (value: any, record: RowType) => {
-    return !!((record[field.id] || []) as string[]).find(
+    return !!((record.page.values[field.id] || []) as string[]).find(
       (tagId) => value === tagId
     );
   },
@@ -35,7 +41,7 @@ const selectColumn = (book: Book, field: Field, view: View) => ({
   })),
 
   onFilter: (value: any, record: RowType) => {
-    return !!((record[field.id] || []) as string[]).find(
+    return !!((record.page.values[field.id] || []) as string[]).find(
       (tagId) => value === tagId
     );
   },
@@ -61,23 +67,38 @@ const urlColumn = (book: Book, field: Field, view: View) => ({
 
 const rateColumn = (book: Book, field: Field, view: View) => ({
   sorter: (a: RowType, b: RowType) => {
-    return Number(a[field.id] || 0) - Number(b[field.id] || 0);
+    return (
+      Number(a.page.values[field.id] || 0) -
+      Number(b.page.values[field.id] || 0)
+    );
   },
-  render: (value: number) => (
+  render: (value: number, record: RowType) => (
     <div style={{ display: "flex", justifyContent: "center" }}>
-      <Rate allowHalf={true} value={value} disabled={true} />
+      <RateInput book={book} page={record.page} field={field} />
+    </div>
+  ),
+});
+
+const datetimeColumn = (book: Book, field: Field, view: View) => ({
+  render: (value: number, record: RowType) => (
+    <div style={{ display: "flex" }}>
+      <DatetimeInput book={book} page={record.page} field={field} />
+    </div>
+  ),
+});
+
+const codeColumn = (book: Book, field: Field, view: View) => ({
+  render: (value: number, record: RowType) => (
+    <div style={{ display: "flex" }}>
+      <ExecuteCodeButton book={book} field={field} page={record.page} />
     </div>
   ),
 });
 
 const checkboxColumn = (book: Book, field: Field, view: View) => ({
-  render: (value: boolean) => (
+  render: (value: boolean, { page }: RowType) => (
     <div style={{ display: "flex", justifyContent: "center" }}>
-      <Checkbox
-        style={{ cursor: "normal" }}
-        checked={value}
-        onChange={() => {}}
-      />
+      <CheckboxInput {...{ book, page, field }} />
     </div>
   ),
   filterValue: (view.filters || {})[field.id],
@@ -87,16 +108,37 @@ const checkboxColumn = (book: Book, field: Field, view: View) => ({
     { text: "Unchecked", value: false },
   ],
   onFilter: (value: any, record: RowType) => {
-    return (record[field.id] as boolean) === value;
+    return (record.page.values[field.id] as boolean) === value;
+  },
+});
+
+const actionColumn = (book: Book, dispatch: Dispatch<any>) => ({
+  title: "Actions",
+  key: book.id,
+  dataIndex: "page",
+  ellipsis: true,
+  render: (page: Page) => {
+    return (
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Button
+          size="small"
+          onClick={(e) => {
+            e.preventDefault();
+            dispatch(setCurrentPageId(book.id, page.id));
+          }}
+        >
+          <ArrowsAltOutlined />
+        </Button>
+      </div>
+    );
   },
 });
 
 const defaultColumn = (book: Book, field: Field, lastColumn: boolean) => ({
   title: field.label,
   key: field.id,
-  dataIndex: field.id,
+  dataIndex: ["page", "values", field.id],
   ellipsis: true,
-  lastColumn,
   onHeaderCell: (): {
     field: Field;
     book: Book;
@@ -108,11 +150,14 @@ const defaultColumn = (book: Book, field: Field, lastColumn: boolean) => ({
   }),
 });
 
-export const columnData = (book: Book, fields: Field[], view: View) => {
-  const validColumns = fields.filter((field) => field.type !== "code");
-
-  return validColumns.map((field, idx) => {
-    const lastColumn = idx === validColumns.length - 1;
+export const columnData = (
+  book: Book,
+  fields: Field[],
+  view: View,
+  dispatch: Dispatch<any>
+) => {
+  const inputCols = fields.map((field, idx) => {
+    const lastColumn = idx === fields.length - 1;
     const fieldColumn = defaultColumn(book, field, lastColumn);
 
     switch (field.type) {
@@ -126,8 +171,13 @@ export const columnData = (book: Book, fields: Field[], view: View) => {
         return { ...fieldColumn, ...rateColumn(book, field, view) };
       case "checkbox":
         return { ...fieldColumn, ...checkboxColumn(book, field, view) };
+      case "code":
+        return { ...fieldColumn, ...codeColumn(book, field, view) };
+      case "datetime":
+        return { ...fieldColumn, ...datetimeColumn(book, field, view) };
       default:
         return fieldColumn;
     }
   });
+  return [actionColumn(book, dispatch), ...inputCols];
 };

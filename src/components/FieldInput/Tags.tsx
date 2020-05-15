@@ -1,16 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { Page, Field, getTagById, getTagByLabel, Book } from "../../types";
 import { useDispatch } from "react-redux";
 import { LabeledValue } from "antd/lib/select";
 import { Select, Tag as AntdTag } from "antd";
 import { updatePageValueTags } from "../../store";
 import { v4 as uuidv4 } from "uuid";
+import { EllipsisOutlined } from "@ant-design/icons";
 
-export const TagsInputs: React.FC<{
+type TagsInputsProps = {
   book: Book;
   page: Page;
   field: Field;
-}> = ({ book, field, page }) => {
+  onBlur?: () => void;
+  autoFocus?: boolean;
+};
+
+export const TagsInputs: React.FC<TagsInputsProps> = ({
+  book,
+  field,
+  page,
+  onBlur = () => {},
+  autoFocus
+}) => {
   const dispatch = useDispatch();
 
   const pageTagIds = (page.values[field.id] as string[]) || [];
@@ -56,6 +67,8 @@ export const TagsInputs: React.FC<{
       labelInValue={true}
       value={values}
       onChange={onChange}
+      onBlur={onBlur}
+      autoFocus={autoFocus}
     >
       {options.map((tag) => {
         return (
@@ -65,5 +78,34 @@ export const TagsInputs: React.FC<{
         );
       })}
     </Select>
+  );
+};
+
+
+export const TagsInputDisplay: React.FC<TagsInputsProps> = ({ book, page, field }) => {
+  const [showInput, setShowInput] = useState(false);
+
+  const taglist = (page.values[field.id] as string[]) || [];
+
+  return (
+    <div
+      style={{ display: "flex", cursor: "pointer" }}
+      onClick={() => field.readOnly ? undefined : setShowInput(true)}
+    >
+      {showInput ? (
+        <TagsInputs
+          book={book}
+          page={page}
+          field={field}
+          onBlur={() => setShowInput(false)}
+          autoFocus={true}
+        />
+      ) : (
+        taglist.map((tagId) => (
+          <AntdTag key={tagId}>{getTagById(field, tagId)?.label}</AntdTag>
+        ))
+      )}
+      {taglist.length === 0 && !showInput ? <EllipsisOutlined /> : " "}
+    </div>
   );
 };

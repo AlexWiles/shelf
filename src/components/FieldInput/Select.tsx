@@ -6,11 +6,17 @@ import { Select, Tag as AntdTag } from "antd";
 import { updatePageValueTags } from "../../store";
 import { v4 as uuidv4 } from "uuid";
 
-export const SelectInput: React.FC<{
+type SelectInputProps = {
   book: Book;
   page: Page;
   field: Field;
-}> = ({ book, field, page }) => {
+};
+
+export const SelectInput: React.FC<SelectInputProps> = ({
+  book,
+  field,
+  page,
+}) => {
   const dispatch = useDispatch();
 
   const options: LabeledValue[] = field.tags.map(

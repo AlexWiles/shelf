@@ -33,7 +33,7 @@ export type Action =
         bookId: string;
         pageId: string;
         fieldId: FieldId;
-        value: ValueData;
+        value: ValueData | undefined;
       };
     }
   | {
@@ -137,7 +137,7 @@ export const setPageFieldValue = (
   bookId: string,
   pageId: string,
   fieldId: FieldId,
-  value: ValueData
+  value: ValueData | undefined
 ): Action => ({
   type: "SET_PAGE_FIELD_VALUE",
   data: { bookId, pageId, fieldId, value },
@@ -222,7 +222,7 @@ export const reducer = (
   state: AppState = newAppState(),
   action: Action
 ): AppState => {
-  console.log(action);
+  //console.log(action);
   switch (action.type) {
     case "NEW_BOOK":
       return produce(state, (draftState) => {
@@ -268,12 +268,19 @@ export const reducer = (
       return produce(state, (draftState) => {
         const { bookId, pageId } = action.data;
         delete draftState.booksById[bookId].pagesById[pageId];
+        if (draftState.booksById[bookId].currentPageId === pageId) {
+          draftState.booksById[bookId].currentPageId = "";
+        }
       });
 
     case "SET_PAGE_FIELD_VALUE":
       return produce(state, (draftState) => {
         const { bookId, pageId, fieldId, value } = action.data;
-        draftState.booksById[bookId].pagesById[pageId].values[fieldId] = value;
+        if (typeof value === "undefined") {
+          delete draftState.booksById[bookId].pagesById[pageId].values[fieldId]
+        } else {
+          draftState.booksById[bookId].pagesById[pageId].values[fieldId] = value;
+        }
       });
 
     case "UPDATE_BOOK_FIELD_LABEL":
@@ -291,7 +298,9 @@ export const reducer = (
     case "UPDATE_BOOK_FIELD_COLUMN_WIDTH":
       return produce(state, (draftState) => {
         const { bookId, fieldId, width } = action.data;
-        draftState.booksById[bookId].fieldsById[fieldId].tableColumnWidth = width;
+        draftState.booksById[bookId].fieldsById[
+          fieldId
+        ].tableColumnWidth = width;
       });
 
     case "UPDATE_BOOK_FIELD_TEXT":

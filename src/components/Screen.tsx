@@ -14,6 +14,7 @@ import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { DropdownEditText } from "./DropdownTextEdit";
 import { PagePanel } from "./PagePanel";
 import { Sidebar } from "./Sidebar";
+import { RemovePage } from "./RemovePage";
 
 export const AppProvider: React.FC = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
@@ -85,20 +86,26 @@ export const BookScreen: React.FC = () => {
           </Button>
         </div>
       </div>
-      <Layout.Content
-        style={{
-          padding: 12,
-          resize: "vertical",
-          overflow: "hidden",
-          flexShrink: 0,
-          flexGrow: 0,
-          height: "50vh",
-        }}
+      <Modal
+        title={book.currentPageId}
+        visible={!!book.currentPageId}
+        onCancel={() => dispatch(setCurrentPageId(book.id, ""))}
+        bodyStyle={{ minHeight: "60vh", display: "flex" }}
+        style={{ minWidth: "66vw" }}
+        footer={
+          <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            <RemovePage bookId={book.id} pageId={book.currentPageId || ""} />
+            <Button
+              key="ok"
+              onClick={() => dispatch(setCurrentPageId(book.id, ""))}
+            >
+              Close
+            </Button>
+          </div>
+        }
       >
-        <div className="contentContainer">
-          <PagePanel book={book} />
-        </div>
-      </Layout.Content>
+        <PagePanel book={book} />
+      </Modal>
       <Layout.Content style={{ padding: 12, flexShrink: 0 }}>
         <div className="contentContainer" style={{ padding: 0 }}>
           <DataTable book={book} />

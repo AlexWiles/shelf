@@ -18,6 +18,7 @@ export const AddField = () => {
     return (
       <div>
         <Button
+          size="small"
           style={{ width: 95, marginRight: 5, marginBottom: 5 }}
           type="default"
           onClick={(e) => {

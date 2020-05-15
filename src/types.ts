@@ -19,7 +19,8 @@ export type FieldType =
   | "url"
   | "code"
   | "textarea"
-  | "checkbox";
+  | "checkbox"
+  | "datetime";
 
 export const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "text", label: "Text" },
@@ -30,6 +31,7 @@ export const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "url", label: "URL" },
   { value: "code", label: "Code" },
   { value: "checkbox", label: "Checkbox" },
+  { value: "datetime", label: "Date" },
 ];
 
 export type Field = {
@@ -96,7 +98,7 @@ export type PagesById = { [pageId: string]: Page };
 export type RowType = {
   key: string;
   id: string;
-  [fieldId: string]: ValueData;
+  page: Page;
 };
 
 export type View = {
