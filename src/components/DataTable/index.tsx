@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Book, Field, Page, View, RowType } from "../../types";
+import { Book, Field, Page, TableView, RowType } from "../../types";
 import { Table, Input } from "antd";
 import { updateBookFieldColumnWidth } from "../../store";
 import { columnData } from "./Columns";
@@ -84,7 +84,7 @@ const filterValues = (fields: Field[], page: Page, search: string) => {
 export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
   const dispatch = useDispatch();
   const fields = book.allFields.map((fieldId) => book.fieldsById[fieldId]);
-  const [view, setView] = useState<View>({ id: "asdf", search: "" });
+  const [view, setView] = useState<TableView>({ id: "asdf", search: "" });
 
   const dataSource: RowType[] = Object.entries(book.pagesById).reduce(
     (results: any[], [id, page]) => {

@@ -1,5 +1,5 @@
 import React, { Dispatch, useState } from "react";
-import { Field, getTagById, Book, View, RowType, Page } from "../../types";
+import { Field, getTagById, Book, TableView, RowType, Page } from "../../types";
 import { Tag as AntdTag, Button } from "antd";
 import { RateInput } from "../FieldInput/Rate";
 import { CheckboxInput } from "../FieldInput/Checkbox";
@@ -10,7 +10,7 @@ import { ExecuteCodeButton } from "../FieldInput/Code";
 import { DatetimeInput } from "../FieldInput/Datetime";
 
 
-const tagColumn = (book: Book, field: Field, view: View) => ({
+const tagColumn = (book: Book, field: Field, view: TableView) => ({
   render: (tagIds: undefined | string[], record: RowType) => {
     return <TagsInputDisplay book={book} page={record.page} field={field} />;
   },
@@ -27,7 +27,7 @@ const tagColumn = (book: Book, field: Field, view: View) => ({
   },
 });
 
-const selectColumn = (book: Book, field: Field, view: View) => ({
+const selectColumn = (book: Book, field: Field, view: TableView) => ({
   render: (tagIds: undefined | string[]) => {
     return (tagIds || []).map((tagId) => (
       <AntdTag key={tagId}>{getTagById(field, tagId)?.label}</AntdTag>
@@ -47,7 +47,7 @@ const selectColumn = (book: Book, field: Field, view: View) => ({
   },
 });
 
-const urlColumn = (book: Book, field: Field, view: View) => ({
+const urlColumn = (book: Book, field: Field, view: TableView) => ({
   render: (url: string) =>
     url ? (
       <div
@@ -65,7 +65,7 @@ const urlColumn = (book: Book, field: Field, view: View) => ({
     ) : undefined,
 });
 
-const rateColumn = (book: Book, field: Field, view: View) => ({
+const rateColumn = (book: Book, field: Field, view: TableView) => ({
   sorter: (a: RowType, b: RowType) => {
     return (
       Number(a.page.values[field.id] || 0) -
@@ -79,7 +79,7 @@ const rateColumn = (book: Book, field: Field, view: View) => ({
   ),
 });
 
-const datetimeColumn = (book: Book, field: Field, view: View) => ({
+const datetimeColumn = (book: Book, field: Field, view: TableView) => ({
   render: (value: number, record: RowType) => (
     <div style={{ display: "flex" }}>
       <DatetimeInput book={book} page={record.page} field={field} />
@@ -87,7 +87,7 @@ const datetimeColumn = (book: Book, field: Field, view: View) => ({
   ),
 });
 
-const codeColumn = (book: Book, field: Field, view: View) => ({
+const codeColumn = (book: Book, field: Field, view: TableView) => ({
   render: (value: number, record: RowType) => (
     <div style={{ display: "flex" }}>
       <ExecuteCodeButton book={book} field={field} page={record.page} />
@@ -95,7 +95,7 @@ const codeColumn = (book: Book, field: Field, view: View) => ({
   ),
 });
 
-const checkboxColumn = (book: Book, field: Field, view: View) => ({
+const checkboxColumn = (book: Book, field: Field, view: TableView) => ({
   render: (value: boolean, { page }: RowType) => (
     <div style={{ display: "flex", justifyContent: "center" }}>
       <CheckboxInput {...{ book, page, field }} />
@@ -153,7 +153,7 @@ const defaultColumn = (book: Book, field: Field, lastColumn: boolean) => ({
 export const columnData = (
   book: Book,
   fields: Field[],
-  view: View,
+  view: TableView,
   dispatch: Dispatch<any>
 ) => {
   const inputCols = fields.map((field, idx) => {

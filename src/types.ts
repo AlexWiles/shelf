@@ -101,7 +101,7 @@ export type RowType = {
   page: Page;
 };
 
-export type View = {
+export type TableView = {
   id: string;
   search: string;
   filters?: Record<string, (string | number)[] | null>;
@@ -109,7 +109,12 @@ export type View = {
 
 export type ViewId = string;
 
-export type ViewsById = { [viewId: string]: View };
+export type TableViewsById = { [viewId: string]: TableView };
+
+export type PageView = {
+  id: string;
+  allFields: FieldId[]
+}
 
 export type Book = {
   id: string;
@@ -118,9 +123,12 @@ export type Book = {
   pagesById: PagesById;
   allFields: FieldId[];
   fieldsById: FieldsById;
-  allViews: ViewId[];
-  viewsById: ViewsById;
-  currentView: ViewId | undefined;
+  allTableViews: ViewId[];
+  tableViewsById: TableViewsById;
+  currentTableViewId: ViewId | undefined;
+  allPageViews: ViewId[];
+  pageViewsById: TableViewsById;
+  currentPageViewId: ViewId | undefined;
 };
 
 export const getFieldIdByLabel = (
@@ -142,9 +150,12 @@ export const newBookState = (): Book => {
     pagesById: { [page.id]: page },
     allFields: [],
     fieldsById: {},
-    allViews: [],
-    viewsById: {},
-    currentView: undefined,
+    allTableViews: [],
+    tableViewsById: {},
+    currentTableViewId: undefined,
+    allPageViews: [],
+    pageViewsById: {},
+    currentPageViewId: undefined,
   };
 };
 
