@@ -172,10 +172,12 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
           padding: 12,
         }}
       >
-        <span>
-          <BookTitle book={book} />
+        <div style={{ display: "flex" }}>
+          <span style={{ marginRight: 16 }}>
+            <BookTitle book={book} />
+          </span>
           <ViewDropdown book={book} />
-        </span>
+        </div>
         <div>
           <Input.Search
             placeholder="Search"
