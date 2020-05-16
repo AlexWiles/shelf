@@ -10,6 +10,7 @@ import {
   newAppState,
   AppState,
   Field,
+  TableView,
 } from "./types";
 
 import produce from "immer";
@@ -92,6 +93,10 @@ export type Action =
   | {
       type: "DELETE_BOOK";
       data: { bookId: string };
+    }
+  | {
+      type: "UPDATE_TABLE_VIEW";
+      data: { bookId: string; tableView: TableView };
     };
 
 export const newBook = (book: Book): Action => ({
@@ -218,6 +223,14 @@ export const updatePageValueTags = (
   },
 });
 
+export const updateTableView = (
+  bookId: string,
+  tableView: TableView
+): Action => ({
+  type: "UPDATE_TABLE_VIEW",
+  data: { bookId, tableView },
+});
+
 export const reducer = (
   state: AppState = newAppState(),
   action: Action
@@ -277,9 +290,11 @@ export const reducer = (
       return produce(state, (draftState) => {
         const { bookId, pageId, fieldId, value } = action.data;
         if (typeof value === "undefined") {
-          delete draftState.booksById[bookId].pagesById[pageId].values[fieldId]
+          delete draftState.booksById[bookId].pagesById[pageId].values[fieldId];
         } else {
-          draftState.booksById[bookId].pagesById[pageId].values[fieldId] = value;
+          draftState.booksById[bookId].pagesById[pageId].values[
+            fieldId
+          ] = value;
         }
       });
 
@@ -372,6 +387,12 @@ export const reducer = (
           fieldId
         ] = dataTagIds;
       });
+
+    case "UPDATE_TABLE_VIEW":
+      return produce(state, draftState => {
+        const { bookId, tableView} = action.data;
+        draftState.booksById[bookId].tableViewsById[tableView.id] = tableView
+      })
 
     default:
       return state;

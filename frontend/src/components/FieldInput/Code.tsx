@@ -11,7 +11,6 @@ import { useDispatch } from "react-redux";
 import { Button } from "antd";
 import {
   updateBookFieldText,
-  updateBookFieldFlag,
   updatePageValueTags,
   setPageFieldValue,
 } from "../../store";
@@ -39,6 +38,34 @@ const fieldsByLabelJSON = (book: Book) => {
   );
 };
 
+export const codeApi = ({
+  book,
+  page,
+  field,
+  sourceId,
+}: {
+  book: Book;
+  page: Page;
+  field: Field;
+  sourceId: string;
+}) => {
+  const code = `
+    const proxy = (url, opts) => { return fetch("http://localhost:3001/requests?url=" + url, opts) }
+    const _VALS = ${pageValuesToJSON(book, page)};
+    const _FIELD_IDS = ${fieldsByLabelJSON(book)};
+    const getValue = (label) => _VALS[label];
+    const g = (l) => getValue(l);
+    const setValue = (label, value) => {
+      window.top.postMessage({type: "SET_VALUE", sourceFieldId: "${
+        field.id
+      }", sourceId: "${sourceId}", fieldId: _FIELD_IDS[label],  value: value})
+    };
+    const _props = { getValue, g, setValue, s};
+    const s = (l, v) => setValue(l, v);`;
+
+  return transform(code, {}).code || "";
+};
+
 const compileFieldCode = (
   book: Book,
   page: Page,
@@ -46,6 +73,7 @@ const compileFieldCode = (
   sourceId: string
 ) => {
   const code = `
+    const proxy = (url, opts) => { return fetch("http://localhost:3001/requests?url=" + url, opts) }
     const _VALS = ${pageValuesToJSON(book, page)};
     const _FIELD_IDS = ${fieldsByLabelJSON(book)};
     const getValue = (label) => _VALS[label];
@@ -61,7 +89,7 @@ const compileFieldCode = (
   return transform(code, {}).code || "";
 };
 
-const handleMessage = (
+export const handleMessage = (
   book: Book,
   page: Page,
   field: Field,
@@ -161,59 +189,115 @@ export const ExecuteCodeButton: React.FC<{
   );
 };
 
-export const CodeInput: React.FC<{
+export const CodeEditor: React.FC<{
   book: Book;
   page: Page;
   field: Field;
 }> = ({ book, page, field }) => {
   const dispatch = useDispatch();
 
-  const buttonStyle: React.CSSProperties = field.collapsed
-    ? { marginRight: 5 }
-    : { marginTop: 5 };
-
   return (
-    <div
-      style={{
-        flexGrow: 1,
-        display: field.collapsed ? "flex" : "block",
-        flexDirection: "row-reverse",
+    <Editor
+      value={field.text}
+      disabled={field.readOnly}
+      onValueChange={(v) => {
+        dispatch(updateBookFieldText(book.id, field.id, v));
       }}
-    >
-      <Collapsable
-        style={{
-          border: "1px solid rgb(217,217,217)",
-        }}
-        collapsed={field.collapsed}
-        onCollapse={(v) =>
-          dispatch(updateBookFieldFlag(book.id, field.id, "collapsed", v))
-        }
-      >
-        <Editor
-          value={field.text}
-          disabled={field.readOnly}
-          onValueChange={(v) => {
-            dispatch(updateBookFieldText(book.id, field.id, v));
-          }}
-          highlight={(code) =>
-            prism.highlight(code, Prism.languages.javascript, "javascript")
-          }
-          padding={5}
-          style={{
-            fontFamily: '"Fira code", "Fira Mono", monospace',
-            fontSize: 12,
-            outline: "none",
-          }}
-        />
-      </Collapsable>
+      highlight={(code) =>
+        prism.highlight(code, Prism.languages.javascript, "javascript")
+      }
+      padding={5}
+      style={{
+        fontFamily: '"Fira code", "Fira Mono", monospace',
+        fontSize: 12,
+        outline: "none",
+      }}
+    />
+  );
+};
+
+export const CodeInput: React.FC<{
+  book: Book;
+  page: Page;
+  field: Field;
+}> = ({ book, page, field }) => {
+  return (
+    <div style={{ flexGrow: 1 }}>
+      {field.readOnly ? undefined : <CodeEditor {...{ book, page, field }} />}
       <div
         style={{
-          ...buttonStyle,
-          ...{ display: "flex" },
+          display: "flex",
         }}
       >
         <ExecuteCodeButton book={book} page={page} field={field} />
       </div>
+    </div>
+  );
+};
+
+export const LiveCodeInput: React.FC<{
+  book: Book;
+  page: Page;
+  field: Field;
+}> = ({ book, page, field }) => {
+  const dispatch = useDispatch();
+  const [sourceId] = useState(v4());
+  const [code, setCode] = useState(field.text);
+  const [updated, setUpdated] = useState(false);
+
+  useEffect(() => {
+    const listener = (event: MessageEvent) => {
+      try {
+        handleMessage(book, page, field, sourceId, dispatch, event);
+      } catch (err) {
+        alert(err);
+      }
+    };
+    window.addEventListener("message", listener);
+    return () => window.removeEventListener("message", listener);
+  }, [book, field, dispatch, sourceId, page]);
+
+  useEffect(() => {
+    try {
+      const transpiled = compileFieldCode(book, page, field, sourceId);
+      eval(transpiled);
+    } catch (err) {
+      console.log(err);
+      alert(err);
+    }
+  }, [page]);
+
+  return (
+    <div style={{ position: "relative", flexGrow: 1 }}>
+      <Editor
+        value={code}
+        disabled={field.readOnly}
+        onValueChange={(v) => {
+          setUpdated(true);
+          setCode(v);
+        }}
+        highlight={(code) =>
+          prism.highlight(code, Prism.languages.javascript, "javascript")
+        }
+        padding={5}
+        style={{
+          fontFamily: '"Fira code", "Fira Mono", monospace',
+          fontSize: 12,
+          outline: "none",
+        }}
+      />
+      <Button
+        type="primary"
+        size="small"
+        disabled={!updated}
+        style={{ position: "absolute", bottom: 5, right: 5 }}
+        onClick={() => {
+          setUpdated(false);
+          dispatch(updateBookFieldText(book.id, field.id, code));
+        }}
+      >
+        Save
+      </Button>
     </div>
   );
 };

@@ -156,8 +156,11 @@ export const columnData = (
   view: TableView,
   dispatch: Dispatch<any>
 ) => {
-  const inputCols = fields.map((field, idx) => {
-    const lastColumn = idx === fields.length - 1;
+
+  const visibleFields = fields.filter(f => view.visibleFields[f.id])
+
+  const inputCols = visibleFields.map((field, idx) => {
+    const lastColumn = idx === visibleFields.length - 1;
     const fieldColumn = defaultColumn(book, field, lastColumn);
 
     switch (field.type) {

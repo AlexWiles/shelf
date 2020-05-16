@@ -19,9 +19,10 @@ import {
 } from "../../store";
 import { DropdownEditText } from "../DropdownTextEdit";
 import { UrlInput } from "./Url";
-import { CodeInput } from "./Code";
+import { CodeInput, LiveCodeInput } from "./Code";
 import { CheckboxInput } from "./Checkbox";
 import { DatetimeInput } from "./Datetime";
+import { IframeInput } from "./Iframe";
 
 const ValueInput: React.FC<{
   book: Book;
@@ -47,19 +48,21 @@ const ValueInput: React.FC<{
       return <CheckboxInput {...{ book, page, field }} />;
     case "datetime":
       return <DatetimeInput {...{ book, page, field }} />;
+    case "iframe":
+      return <LiveCodeInput {...{ book, page, field }} />;
     default:
       return <div></div>;
   }
 };
 
-const FieldEditIcon: React.FC<{ book: Book; field: Field }> = ({
+export const FieldEditIcon: React.FC<{ book: Book; field: Field }> = ({
   book,
   field,
 }) => {
   const dispatch = useDispatch();
   return (
     <DropdownEditText
-      iconStyle={{cursor: 'grab'}}
+      iconStyle={{ cursor: "grab" }}
       text={{
         component: (
           <Typography.Text strong>

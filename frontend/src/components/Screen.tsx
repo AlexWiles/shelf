@@ -33,47 +33,6 @@ export const BookScreen: React.FC = () => {
     <Layout>
       <div style={{ paddingLeft: 12, paddingTop: 12, paddingRight: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <DropdownEditText
-            text={{
-              value: book.name,
-              onChange: (v) => dispatch(updateBookName(book.id, v)),
-              component: (
-                <Typography.Title
-                  key={book.id}
-                  level={4}
-                  style={{ marginBottom: 0 }}
-                >
-                  {book.name}
-                </Typography.Title>
-              ),
-            }}
-            menuItems={[
-              <Menu.Item
-                key={book.id}
-                icon={
-                  <Typography.Text type="danger">
-                    <DeleteOutlined />
-                  </Typography.Text>
-                }
-                onClick={() => {
-                  const modal = Modal.confirm({});
-                  modal.update({
-                    title: "Are you sure you want to delete this book?",
-                    icon: <ExclamationCircleOutlined />,
-                    okText: "Yes",
-                    cancelText: "No",
-                    onOk: () => {
-                      dispatch(deleteBook(book.id));
-                      modal.destroy();
-                    },
-                  });
-                }}
-              >
-                <Typography.Text type="danger">Delete book</Typography.Text>
-              </Menu.Item>,
-            ]}
-          />
-
           <Button
             onClick={(e) => {
               e.preventDefault();

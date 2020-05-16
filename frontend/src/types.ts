@@ -20,7 +20,8 @@ export type FieldType =
   | "code"
   | "textarea"
   | "checkbox"
-  | "datetime";
+  | "datetime"
+  | "iframe";
 
 export const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "text", label: "Text" },
@@ -32,6 +33,7 @@ export const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "code", label: "Code" },
   { value: "checkbox", label: "Checkbox" },
   { value: "datetime", label: "Date" },
+  { value: "iframe", label: "iframe" },
 ];
 
 export type Field = {
@@ -101,11 +103,30 @@ export type RowType = {
   page: Page;
 };
 
+export type VisibleFields = {
+  [fieldId: string]: boolean;
+};
+
 export type TableView = {
   id: string;
+  name: string;
   search: string;
   filters?: Record<string, (string | number)[] | null>;
+  fieldIds: string[] | undefined;
+  visibleFields: VisibleFields;
 };
+
+export const newTableView = (book?: Book): TableView => ({
+  id: uuidv4(),
+  name: "view",
+  search: "",
+  fieldIds: undefined,
+  visibleFields:
+    book?.allFields.reduce(
+      (obj, fieldId) => ({ ...obj, ...{ [fieldId]: true } }),
+      {}
+    ) || {},
+});
 
 export type ViewId = string;
 
@@ -113,8 +134,8 @@ export type TableViewsById = { [viewId: string]: TableView };
 
 export type PageView = {
   id: string;
-  allFields: FieldId[]
-}
+  allFields: FieldId[];
+};
 
 export type Book = {
   id: string;
@@ -125,7 +146,7 @@ export type Book = {
   fieldsById: FieldsById;
   allTableViews: ViewId[];
   tableViewsById: TableViewsById;
-  currentTableViewId: ViewId | undefined;
+  currentTableViewId: ViewId;
   allPageViews: ViewId[];
   pageViewsById: TableViewsById;
   currentPageViewId: ViewId | undefined;
@@ -142,6 +163,7 @@ export const getFieldIdByLabel = (
 
 export const newBookState = (): Book => {
   const page = newPage();
+  const tableView = newTableView();
 
   return {
     id: uuidv4(),
@@ -150,9 +172,9 @@ export const newBookState = (): Book => {
     pagesById: { [page.id]: page },
     allFields: [],
     fieldsById: {},
-    allTableViews: [],
-    tableViewsById: {},
-    currentTableViewId: undefined,
+    allTableViews: [tableView.id],
+    tableViewsById: { [tableView.id]: tableView },
+    currentTableViewId: tableView.id,
     allPageViews: [],
     pageViewsById: {},
     currentPageViewId: undefined,
