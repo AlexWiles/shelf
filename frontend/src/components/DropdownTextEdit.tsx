@@ -10,7 +10,8 @@ export const DropdownEditText: React.FC<{
   };
   menuItems: ReactNode[];
   iconStyle?: React.CSSProperties;
-}> = ({ text, menuItems, iconStyle = {} }) => {
+  selectedMenuKeys?: string[];
+}> = ({ text, menuItems, selectedMenuKeys, iconStyle = {} }) => {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -18,7 +19,7 @@ export const DropdownEditText: React.FC<{
       onVisibleChange={setVisible}
       visible={visible}
       overlay={
-        <Menu>
+        <Menu selectedKeys={selectedMenuKeys}>
           <Menu.Item
             key="name"
             onClick={() => {

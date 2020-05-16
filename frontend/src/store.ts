@@ -97,6 +97,18 @@ export type Action =
   | {
       type: "UPDATE_TABLE_VIEW";
       data: { bookId: string; tableView: TableView };
+    }
+  | {
+      type: "ADD_TABLE_VIEW";
+      data: { bookId: string; tableView: TableView };
+    }
+  | {
+      type: "DELETE_TABLE_VIEW";
+      data: { bookId: string; tableView: TableView };
+    }
+  | {
+      type: "SET_CURRENT_TABLE_VIEW";
+      data: { bookId: string; tableViewId: string };
     };
 
 export const newBook = (book: Book): Action => ({
@@ -229,6 +241,27 @@ export const updateTableView = (
 ): Action => ({
   type: "UPDATE_TABLE_VIEW",
   data: { bookId, tableView },
+});
+
+export const addTableView = (bookId: string, tableView: TableView): Action => ({
+  type: "ADD_TABLE_VIEW",
+  data: { bookId, tableView },
+});
+
+export const deleteTableView = (
+  bookId: string,
+  tableView: TableView
+): Action => ({
+  type: "ADD_TABLE_VIEW",
+  data: { bookId, tableView },
+});
+
+export const setCurrentTableView = (
+  bookId: string,
+  tableViewId: string
+): Action => ({
+  type: "SET_CURRENT_TABLE_VIEW",
+  data: { bookId, tableViewId },
 });
 
 export const reducer = (
@@ -389,10 +422,24 @@ export const reducer = (
       });
 
     case "UPDATE_TABLE_VIEW":
-      return produce(state, draftState => {
-        const { bookId, tableView} = action.data;
-        draftState.booksById[bookId].tableViewsById[tableView.id] = tableView
-      })
+      return produce(state, (draftState) => {
+        const { bookId, tableView } = action.data;
+        draftState.booksById[bookId].tableViewsById[tableView.id] = tableView;
+      });
+
+    case "ADD_TABLE_VIEW":
+      return produce(state, (draftState) => {
+        const { bookId, tableView } = action.data;
+        draftState.booksById[bookId].tableViewsById[tableView.id] = tableView;
+        draftState.booksById[bookId].allTableViews.push(tableView.id);
+        draftState.booksById[bookId].currentTableViewId = tableView.id;
+      });
+
+    case "SET_CURRENT_TABLE_VIEW":
+      return produce(state, (draftState) => {
+        const { bookId, tableViewId } = action.data;
+        draftState.booksById[bookId].currentTableViewId = tableViewId;
+      });
 
     default:
       return state;

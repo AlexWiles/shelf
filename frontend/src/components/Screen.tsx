@@ -1,17 +1,13 @@
 import React from "react";
 import { Provider, useSelector, useDispatch } from "react-redux";
-import { Layout, Typography, Menu, Modal, Button } from "antd";
+import { Layout, Modal, Button } from "antd";
 import {
   store,
   setCurrentPageId,
-  updateBookName,
-  deleteBook,
   setBookPage,
 } from "../store";
 import { AppState, currentBook, ViewingPage, newPage } from "../types";
 import { DataTable } from "./DataTable";
-import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-import { DropdownEditText } from "./DropdownTextEdit";
 import { PagePanel } from "./PagePanel";
 import { Sidebar } from "./Sidebar";
 import { RemovePage } from "./RemovePage";

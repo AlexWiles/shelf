@@ -1,6 +1,5 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { Page } from "../types";
 import { Button, Popconfirm } from "antd";
 import { deleteBookPage } from "../store";
 

@@ -109,6 +109,7 @@ export type VisibleFields = {
 
 export type TableView = {
   id: string;
+  default: boolean;
   name: string;
   search: string;
   filters?: Record<string, (string | number)[] | null>;
@@ -118,6 +119,7 @@ export type TableView = {
 
 export const newTableView = (book?: Book): TableView => ({
   id: uuidv4(),
+  default: false,
   name: "view",
   search: "",
   fieldIds: undefined,
@@ -163,7 +165,7 @@ export const getFieldIdByLabel = (
 
 export const newBookState = (): Book => {
   const page = newPage();
-  const tableView = newTableView();
+  const tableView = { ...newTableView(), ...{ default: true } };
 
   return {
     id: uuidv4(),
