@@ -34,6 +34,7 @@ export const AddField = () => {
     return (
       <div style={{ display: "flex" }}>
         <Input
+          size="small"
           style={{ width: 150, marginRight: 5, marginBottom: 5 }}
           placeholder="label"
           value={label}
@@ -43,6 +44,7 @@ export const AddField = () => {
         />
         <Select
           showSearch
+          size="small"
           style={{ width: 150, marginRight: 5, marginBottom: 5 }}
           optionFilterProp="children"
           placeholder="Select field type"
@@ -59,6 +61,7 @@ export const AddField = () => {
           ))}
         </Select>
         <Button
+          size="small"
           style={{ width: 95, marginRight: 8, marginBottom: 5 }}
           type="primary"
           onClick={(e) => {
@@ -75,6 +78,7 @@ export const AddField = () => {
         </Button>
         <Button
           danger
+          size="small"
           style={{ width: 95, marginRight: 8, marginBottom: 5 }}
           onClick={(e) => {
             e.preventDefault();
