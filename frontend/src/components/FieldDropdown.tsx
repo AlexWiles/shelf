@@ -118,6 +118,7 @@ export const FieldDropdown: React.FC<{
       overlay={menu}
     >
       <Button
+        size="small"
         onClick={(e) => {
           e.preventDefault();
           console.log("click");

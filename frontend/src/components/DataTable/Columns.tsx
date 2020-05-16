@@ -9,7 +9,6 @@ import { TagsInputs, TagsInputDisplay } from "../FieldInput/Tags";
 import { ExecuteCodeButton } from "../FieldInput/Code";
 import { DatetimeInput } from "../FieldInput/Datetime";
 
-
 const tagColumn = (book: Book, field: Field, view: TableView) => ({
   render: (tagIds: undefined | string[], record: RowType) => {
     return <TagsInputDisplay book={book} page={record.page} field={field} />;
@@ -119,7 +118,7 @@ const actionColumn = (book: Book, dispatch: Dispatch<any>) => ({
   ellipsis: true,
   render: (page: Page) => {
     return (
-      <div style={{ display: "flex", justifyContent: "center" }}>
+      <div style={{ display: "flex" }}>
         <Button
           size="small"
           onClick={(e) => {
@@ -127,6 +126,7 @@ const actionColumn = (book: Book, dispatch: Dispatch<any>) => ({
             dispatch(setCurrentPageId(book.id, page.id));
           }}
         >
+          open
           <ArrowsAltOutlined />
         </Button>
       </div>
@@ -156,8 +156,7 @@ export const columnData = (
   view: TableView,
   dispatch: Dispatch<any>
 ) => {
-
-  const visibleFields = fields.filter(f => view.visibleFields[f.id])
+  const visibleFields = fields.filter((f) => view.visibleFields[f.id]);
 
   const inputCols = visibleFields.map((field, idx) => {
     const lastColumn = idx === visibleFields.length - 1;

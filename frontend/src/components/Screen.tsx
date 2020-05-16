@@ -27,20 +27,6 @@ export const BookScreen: React.FC = () => {
 
   return (
     <Layout>
-      <div style={{ paddingLeft: 12, paddingTop: 12, paddingRight: 12 }}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              const page = newPage();
-              dispatch(setBookPage(book.id, page.id, page));
-              dispatch(setCurrentPageId(book.id, page.id));
-            }}
-          >
-            + New page
-          </Button>
-        </div>
-      </div>
       <Modal
         title={book.currentPageId}
         visible={!!book.currentPageId}
