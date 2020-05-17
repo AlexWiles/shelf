@@ -1,11 +1,20 @@
-import React, { useState } from "react";
-import { Page, Field, getTagById, getTagByLabel, Book } from "../../types";
+import React, { useState, Dispatch } from "react";
+import {
+  Page,
+  Field,
+  getTagById,
+  getTagByLabel,
+  Book,
+  newTag,
+} from "../../types";
 import { useDispatch } from "react-redux";
 import { LabeledValue } from "antd/lib/select";
-import { Select, Tag as AntdTag } from "antd";
-import { updatePageValueTags } from "../../store";
-import { v4 as uuidv4 } from "uuid";
-import { EllipsisOutlined } from "@ant-design/icons";
+import { Select, Tag as AntdTag, Menu, Typography, Input, Popover } from "antd";
+import { updatePageValueTags, updateFieldTag } from "../../store";
+import {
+  EllipsisOutlined,
+} from "@ant-design/icons";
+import { TwitterPicker } from "react-color";
 
 type TagsInputsProps = {
   book: Book;
@@ -20,7 +29,7 @@ export const TagsInputs: React.FC<TagsInputsProps> = ({
   field,
   page,
   onBlur = () => {},
-  autoFocus
+  autoFocus,
 }) => {
   const dispatch = useDispatch();
 
@@ -34,16 +43,15 @@ export const TagsInputs: React.FC<TagsInputsProps> = ({
     })
   );
 
-  const values = options.filter((opt) =>
-    pageTagIds.find((tagId) => opt.key === tagId)
+  const values = field.tags.filter((tag) =>
+    pageTagIds.find((id) => id === tag.id)
   );
 
   const onChange = (tags: LabeledValue[]): void => {
     const nextTags = tags.map((tag) => {
       const byId = getTagById(field, tag.key || "");
       const byLabel = getTagByLabel(field, String(tag.value) || "");
-      const newTag = { id: uuidv4(), label: String(tag.value) };
-      return byId || byLabel || newTag;
+      return byId || byLabel || newTag(String(tag.value));
     });
 
     dispatch(updatePageValueTags(book.id, page.id, field.id, nextTags));
@@ -53,7 +61,11 @@ export const TagsInputs: React.FC<TagsInputsProps> = ({
     return (
       <>
         {values.map((tag) => {
-          return <AntdTag key={tag.value}>{tag.label}</AntdTag>;
+          return (
+            <AntdTag key={tag.id} color={tag.color}>
+              {tag.label}
+            </AntdTag>
+          );
         })}
       </>
     );
@@ -65,15 +77,25 @@ export const TagsInputs: React.FC<TagsInputsProps> = ({
       mode="tags"
       style={{ width: "100%" }}
       labelInValue={true}
-      value={values}
+      value={values.map(
+        (tag): LabeledValue => ({
+          key: tag.id,
+          value: tag.label.toLowerCase(),
+          label: tag.label,
+        })
+      )}
       onChange={onChange}
       onBlur={onBlur}
       autoFocus={autoFocus}
+      tagRender={(props) => {
+        const tag = getTagByLabel(field, props.label as string);
+        return <AntdTag color={tag?.color}>{props.label}</AntdTag>;
+      }}
     >
-      {options.map((tag) => {
+      {field.tags.map((tag) => {
         return (
-          <Select.Option key={tag.key} value={tag.value} label={tag.label}>
-            {tag.label}
+          <Select.Option key={tag.id} value={tag.label} label={tag.label}>
+            <AntdTag color={tag.color}>{tag.label}</AntdTag>
           </Select.Option>
         );
       })}
@@ -81,8 +103,11 @@ export const TagsInputs: React.FC<TagsInputsProps> = ({
   );
 };
 
-
-export const TagsInputDisplay: React.FC<TagsInputsProps> = ({ book, page, field }) => {
+export const TagsInputDisplay: React.FC<TagsInputsProps> = ({
+  book,
+  page,
+  field,
+}) => {
   const [showInput, setShowInput] = useState(false);
 
   const taglist = (page.values[field.id] as string[]) || [];
@@ -90,7 +115,7 @@ export const TagsInputDisplay: React.FC<TagsInputsProps> = ({ book, page, field 
   return (
     <div
       style={{ display: "flex", cursor: "pointer" }}
-      onClick={() => field.readOnly ? undefined : setShowInput(true)}
+      onClick={() => (field.readOnly ? undefined : setShowInput(true))}
     >
       {showInput ? (
         <TagsInputs
@@ -101,11 +126,104 @@ export const TagsInputDisplay: React.FC<TagsInputsProps> = ({ book, page, field 
           autoFocus={true}
         />
       ) : (
-        taglist.map((tagId) => (
-          <AntdTag key={tagId}>{getTagById(field, tagId)?.label}</AntdTag>
-        ))
+        taglist.map((tagId) => {
+          const tag = getTagById(field, tagId);
+          return (
+            <AntdTag key={tagId} color={tag?.color}>
+              {tag?.label}
+            </AntdTag>
+          );
+        })
       )}
       {taglist.length === 0 && !showInput ? <EllipsisOutlined /> : " "}
     </div>
   );
+};
+
+const ColorPicker: React.FC<{
+  color: string;
+  onChangeComplete: (color: string) => void;
+}> = ({ color, onChangeComplete }) => {
+  const [state, setState] = useState(false);
+
+  return (
+    <div
+      style={{ position: "relative" }}
+      onMouseEnter={() => setState(true)}
+      onMouseLeave={() => setState(false)}
+    >
+      <div
+        style={{
+          backgroundColor: color,
+          minWidth: 24,
+          height: 24,
+          marginRight: 8,
+          borderRadius: 2,
+        }}
+      >
+        {" "}
+      </div>
+      <div
+        style={{
+          display: state ? "" : "none",
+          zIndex: 9999,
+          position: "absolute",
+          left: -5,
+          top: 26,
+        }}
+      >
+        <TwitterPicker
+          color={color}
+          onChangeComplete={(c) => onChangeComplete(c.hex)}
+        />
+      </div>
+    </div>
+  );
+};
+
+export const fieldDropdownTagOptions = (
+  book: Book,
+  field: Field,
+  dispatch: Dispatch<any>
+) => {
+  const items = field.tags.map((tag) => (
+    <Menu.Item key={tag.id} onClick={() => {}}>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <ColorPicker
+          color={tag.color}
+          onChangeComplete={(color) =>
+            dispatch(
+              updateFieldTag(book.id, field.id, {
+                ...tag,
+                ...{ color },
+              })
+            )
+          }
+        />
+        <Input
+          value={tag.label}
+          onChange={(v) =>
+            dispatch(
+              updateFieldTag(book.id, field.id, {
+                ...tag,
+                ...{ label: v.target.value },
+              })
+            )
+          }
+        />
+      </div>
+    </Menu.Item>
+  ));
+
+  if (items.length === 0) {
+    return items;
+  } else {
+    return [
+      <Menu.Divider></Menu.Divider>,
+      <Menu.Item key="">
+        <Typography.Text strong>Values</Typography.Text>
+      </Menu.Item>,
+      ...items,
+    ];
+  }
 };

@@ -1,10 +1,19 @@
 import React from "react";
-import { Tag, Page, Field, getTagById, getTagByLabel, Book } from "../../types";
+import {
+  Tag,
+  Page,
+  Field,
+  getTagById,
+  getTagByLabel,
+  Book,
+  newTag,
+} from "../../types";
 import { useDispatch } from "react-redux";
 import { LabeledValue } from "antd/lib/select";
 import { Select, Tag as AntdTag } from "antd";
 import { updatePageValueTags } from "../../store";
 import { v4 as uuidv4 } from "uuid";
+import { getRandomColor } from "../../lib";
 
 type SelectInputProps = {
   book: Book;
@@ -19,17 +28,9 @@ export const SelectInput: React.FC<SelectInputProps> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const options: LabeledValue[] = field.tags.map(
-    (tag): LabeledValue => ({
-      key: tag.id,
-      value: tag.label,
-      label: tag.label,
-    })
-  );
-
   const pageTagIds = (page.values[field.id] as string[]) || [];
-  const values = options.filter((opt) =>
-    pageTagIds.find((id) => id === opt.key)
+  const values = field.tags.filter((tag) =>
+    pageTagIds.find((id) => id === tag.id)
   );
 
   const onChange = (tags: LabeledValue[]): void => {
@@ -37,7 +38,7 @@ export const SelectInput: React.FC<SelectInputProps> = ({
       (tag): Tag => {
         const byId = getTagById(field, tag.key || "");
         const byLabel = getTagByLabel(field, String(tag.value) || "");
-        return byId || byLabel || { id: uuidv4(), label: String(tag.value) };
+        return byId || byLabel || newTag(String(tag.value));
       }
     );
 
@@ -47,7 +48,7 @@ export const SelectInput: React.FC<SelectInputProps> = ({
       values.length === 0
         ? selectedTags
         : selectedTags.filter((tag) => {
-            return !values.find((v) => v.key === tag.id);
+            return !values.find((v) => v.id === tag.id);
           });
 
     dispatch(updatePageValueTags(book.id, page.id, field.id, nextTags));
@@ -57,7 +58,7 @@ export const SelectInput: React.FC<SelectInputProps> = ({
     return (
       <>
         {values.map((tag) => {
-          return <AntdTag key={tag.value}>{tag.label}</AntdTag>;
+          return <AntdTag key={tag.id}>{tag.label}</AntdTag>;
         })}
       </>
     );
@@ -68,13 +69,19 @@ export const SelectInput: React.FC<SelectInputProps> = ({
       mode="tags"
       style={{ width: "100%" }}
       labelInValue={true}
-      value={values}
+      value={values.map(
+        (tag): LabeledValue => ({
+          key: tag.id,
+          value: tag.label.toLowerCase(),
+          label: tag.label,
+        })
+      )}
       onChange={onChange}
     >
-      {options.map((tag) => {
+      {field.tags.map((tag) => {
         return (
-          <Select.Option key={tag.key} value={tag.value} label={tag.label}>
-            {tag.label}
+          <Select.Option key={tag.id} value={tag.label} label={tag.label}>
+            <AntdTag color={tag.color}>{tag.label}</AntdTag>
           </Select.Option>
         );
       })}

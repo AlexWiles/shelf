@@ -1,10 +1,13 @@
 import { v4 as uuidv4 } from "uuid";
+import { uniqueBy, getRandomColor } from "./lib";
+import produce from "immer";
 
 export type TagId = string;
 
 export type Tag = {
   id: TagId;
   label: string;
+  color: string;
 };
 
 export type TagsById = { [tagId: string]: Tag };
@@ -30,10 +33,10 @@ export const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "select", label: "Select" },
   { value: "rate", label: "Stars" },
   { value: "url", label: "URL" },
-  { value: "code", label: "Code" },
   { value: "checkbox", label: "Checkbox" },
   { value: "datetime", label: "Date" },
-  { value: "iframe", label: "iframe" },
+  { value: "code", label: "Code" },
+  { value: "iframe", label: "Live code" },
 ];
 
 export type Field = {
@@ -73,7 +76,11 @@ export const getTagByLabel = (
   );
 };
 
-export const newTag = (value: string) => ({ id: uuidv4(), label: value });
+export const newTag = (value: string) => ({
+  id: uuidv4(),
+  label: value,
+  color: getRandomColor(),
+});
 
 export type ValueData = string | string[] | number | number[] | boolean;
 
@@ -113,30 +120,67 @@ export type TableView = {
   name: string;
   search: string;
   filters?: Record<string, (string | number)[] | null>;
-  fieldIds: string[] | undefined;
-  visibleFields: VisibleFields;
+  fieldIds: string[];
+  visibleFields: VisibleFields | undefined;
 };
 
-export const newTableView = (book?: Book): TableView => ({
+export const newTableView = (): TableView => ({
   id: uuidv4(),
   default: false,
-  name: "view",
+  name: "Table view",
   search: "",
-  fieldIds: undefined,
-  visibleFields:
-    book?.allFields.reduce(
-      (obj, fieldId) => ({ ...obj, ...{ [fieldId]: true } }),
-      {}
-    ) || {},
+  fieldIds: [],
+  visibleFields: undefined,
+});
+
+export type PageView = {
+  id: string;
+  default: boolean;
+  name: string;
+  fieldIds: string[];
+  visibleFields: VisibleFields | undefined;
+};
+
+export const newPageView = (): PageView => ({
+  id: uuidv4(),
+  default: false,
+  name: "Page view",
+  fieldIds: [],
+  visibleFields: undefined,
 });
 
 export type ViewId = string;
 
 export type TableViewsById = { [viewId: string]: TableView };
+export type PageViewsById = { [viewId: string]: PageView };
 
-export type PageView = {
-  id: string;
-  allFields: FieldId[];
+export const fieldsForView = (
+  book: Book,
+  view: TableView | PageView
+): string[] => {
+  // concat view fields and book fields to handle new fields that were added
+  // filter out fields not in book fields to handle deleted fields
+  return uniqueBy([...view.fieldIds, ...book.allFields], (id) => id).filter(
+    (fieldId) => book.fieldsById[fieldId]
+  );
+};
+
+export const visibleFieldsForView = (
+  book: Book,
+  view: TableView | PageView
+) => {
+  return fieldsForView(book, view).filter(
+    (fieldId) => !view.visibleFields || view.visibleFields[fieldId]
+  );
+};
+
+export const visibleFieldsByIdForView = (
+  book: Book,
+  view: TableView | PageView
+) => {
+  return visibleFieldsForView(book, view).reduce((obj, fieldId) => {
+    return { ...obj, ...{ [fieldId]: true } };
+  }, {});
 };
 
 export type Book = {
@@ -150,8 +194,8 @@ export type Book = {
   tableViewsById: TableViewsById;
   currentTableViewId: ViewId;
   allPageViews: ViewId[];
-  pageViewsById: TableViewsById;
-  currentPageViewId: ViewId | undefined;
+  pageViewsById: PageViewsById;
+  currentPageViewId: ViewId;
 };
 
 export const getFieldIdByLabel = (
@@ -166,6 +210,7 @@ export const getFieldIdByLabel = (
 export const newBookState = (): Book => {
   const page = newPage();
   const tableView = { ...newTableView(), ...{ default: true } };
+  const pageView = { ...newPageView(), ...{ default: true } };
 
   return {
     id: uuidv4(),
@@ -177,9 +222,9 @@ export const newBookState = (): Book => {
     allTableViews: [tableView.id],
     tableViewsById: { [tableView.id]: tableView },
     currentTableViewId: tableView.id,
-    allPageViews: [],
-    pageViewsById: {},
-    currentPageViewId: undefined,
+    allPageViews: [pageView.id],
+    pageViewsById: { [pageView.id]: pageView },
+    currentPageViewId: pageView.id,
   };
 };
 

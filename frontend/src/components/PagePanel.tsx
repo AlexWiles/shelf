@@ -1,10 +1,10 @@
-import { Book, Page } from "../types";
+import { Book, Page, visibleFieldsForView } from "../types";
 import React from "react";
 import { AddField } from "./AddField";
 import FieldInput from "./FieldInput";
 import { SortableContainer, SortableElement } from "react-sortable-hoc";
 import { useDispatch } from "react-redux";
-import { setBookFieldIds } from "../store";
+import { setBookFieldIds, updatePageView } from "../store";
 import { arrMove } from "../lib";
 
 const SortableItem = SortableElement(
@@ -13,10 +13,13 @@ const SortableItem = SortableElement(
   )
 );
 
-const Data = SortableContainer(({ book, page }: { book: Book; page: Page }) => {
+const SortableFieldList = SortableContainer(({ book, page }: { book: Book; page: Page }) => {
+  const view = book.pageViewsById[book.currentPageViewId];
+  const visibleFields = visibleFieldsForView(book, view);
+
   return (
     <div>
-      {book.allFields.map((fieldId, index) => {
+      {visibleFields.map((fieldId, index) => {
         return (
           <SortableItem
             key={fieldId}
@@ -31,18 +34,21 @@ const Data = SortableContainer(({ book, page }: { book: Book; page: Page }) => {
   );
 });
 
-const DataDisplay: React.FC<{ book: Book; page: Page }> = ({ book, page }) => {
+const FieldInputDisplay: React.FC<{ book: Book; page: Page }> = ({ book, page }) => {
   const dispatch = useDispatch();
+  const pageView = book.pageViewsById[book.currentPageViewId];
 
   return (
     <div>
-      <Data
+      <SortableFieldList
+      helperClass="zIndexAbovePopup"
         book={book}
         page={page}
         distance={1}
         onSortEnd={({ oldIndex, newIndex }) => {
-          const newFieldIdsOrder = arrMove(book.allFields, oldIndex, newIndex);
-          dispatch(setBookFieldIds(book.id, newFieldIdsOrder));
+          const newFieldIdsOrder = arrMove(visibleFieldsForView(book, pageView), oldIndex, newIndex);
+          const newView = {...pageView, ...{fieldIds: newFieldIdsOrder}}
+          dispatch(updatePageView(book.id, newView));
         }}
       />
     </div>
@@ -71,7 +77,7 @@ export const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
           }}
         >
           <div>
-            {page ? <DataDisplay book={book} page={page} /> : undefined}
+            {page ? <FieldInputDisplay book={book} page={page} /> : undefined}
             <AddField />
           </div>
 
@@ -82,8 +88,7 @@ export const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
                 justifyContent: "space-between",
                 alignItems: "baseline",
               }}
-            >
-            </div>
+            ></div>
           ) : undefined}
         </div>
       </div>

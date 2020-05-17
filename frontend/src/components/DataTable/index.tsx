@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Book, Field, Page, RowType, newPage, newTableView } from "../../types";
+import {
+  Book,
+  Field,
+  Page,
+  RowType,
+  newPage,
+  newTableView,
+  visibleFieldsForView,
+  visibleFieldsByIdForView,
+  fieldsForView,
+} from "../../types";
 import { Table, Input, Button, Typography, Menu } from "antd";
 import {
   updateBookFieldColumnWidth,
@@ -101,7 +111,7 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
   const dispatch = useDispatch();
 
   const view = book.tableViewsById[book.currentTableViewId];
-  const fields = (view.fieldIds || book.allFields).map(
+  const fields = fieldsForView(book, view).map(
     (fieldId) => book.fieldsById[fieldId]
   );
 
@@ -119,7 +129,7 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
     []
   );
 
-  const columns = columnData(book, fields, view, dispatch);
+  const columns = columnData(book, view, dispatch);
 
   return (
     <div>
@@ -156,8 +166,8 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
           <span style={{ marginRight: 8 }}>
             <FieldDropdown
               book={book}
-              allFields={view.fieldIds}
-              visibleFields={view.visibleFields}
+              allFields={fieldsForView(book, view)}
+              visibleFields={visibleFieldsByIdForView(book, view)}
               onSortChange={(fieldIds) =>
                 dispatch(updateTableView(book.id, { ...view, ...{ fieldIds } }))
               }
@@ -170,7 +180,6 @@ export const DataTable: React.FC<{ book: Book }> = ({ book }) => {
           </span>
 
           <Button
-
             size="small"
             onClick={(e) => {
               e.preventDefault();

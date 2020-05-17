@@ -1,7 +1,10 @@
-import React from "react";
+import React, { Dispatch } from "react";
 import { Book, Page, Field } from "../../types";
 import { TextInput, TextareaInput, TextareaInputDisplay } from "./Text";
-import { TagsInputs } from "./Tags";
+import {
+  TagsInputs,
+  fieldDropdownTagOptions,
+} from "./Tags";
 import { SelectInput } from "./Select";
 import { RateInput } from "./Rate";
 import {
@@ -52,6 +55,16 @@ const ValueInput: React.FC<{
       return <LiveCodeInput {...{ book, page, field }} />;
     default:
       return <div></div>;
+  }
+};
+
+const dropdownOptions = (book: Book, field: Field, dispatch: Dispatch<any>): React.ReactNode[] => {
+  switch (field.type) {
+    case "tags":
+    case "select":
+      return fieldDropdownTagOptions(book, field, dispatch);
+    default:
+      return [];
   }
 };
 
@@ -118,6 +131,7 @@ export const FieldEditIcon: React.FC<{ book: Book; field: Field }> = ({
         >
           <Typography.Text type="danger">Delete field</Typography.Text>
         </Menu.Item>,
+        ...dropdownOptions(book, field, dispatch),
       ]}
     />
   );

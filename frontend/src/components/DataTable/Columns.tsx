@@ -1,5 +1,14 @@
 import React, { Dispatch, useState } from "react";
-import { Field, getTagById, Book, TableView, RowType, Page } from "../../types";
+import {
+  Field,
+  getTagById,
+  Book,
+  TableView,
+  RowType,
+  Page,
+  fieldsForView,
+  visibleFieldsForView,
+} from "../../types";
 import { Tag as AntdTag, Button } from "antd";
 import { RateInput } from "../FieldInput/Rate";
 import { CheckboxInput } from "../FieldInput/Checkbox";
@@ -152,13 +161,13 @@ const defaultColumn = (book: Book, field: Field, lastColumn: boolean) => ({
 
 export const columnData = (
   book: Book,
-  fields: Field[],
   view: TableView,
   dispatch: Dispatch<any>
 ) => {
-  const visibleFields = fields.filter((f) => view.visibleFields[f.id]);
+  const visibleFields = visibleFieldsForView(book, view);
 
-  const inputCols = visibleFields.map((field, idx) => {
+  const inputCols = visibleFields.map((fieldId, idx) => {
+    const field = book.fieldsById[fieldId];
     const lastColumn = idx === visibleFields.length - 1;
     const fieldColumn = defaultColumn(book, field, lastColumn);
 

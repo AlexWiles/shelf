@@ -1,16 +1,14 @@
 import React from "react";
 import { Provider, useSelector, useDispatch } from "react-redux";
 import { Layout, Modal, Button } from "antd";
-import {
-  store,
-  setCurrentPageId,
-  setBookPage,
-} from "../store";
+import { store, setCurrentPageId } from "../store";
 import { AppState, currentBook, ViewingPage, newPage } from "../types";
 import { DataTable } from "./DataTable";
 import { PagePanel } from "./PagePanel";
 import { Sidebar } from "./Sidebar";
 import { RemovePage } from "./RemovePage";
+import { PageViewDropdown } from "./PageViewDropdown";
+import { FieldDropdown } from "./FieldDropdown";
 
 export const AppProvider: React.FC = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
@@ -28,13 +26,17 @@ export const BookScreen: React.FC = () => {
   return (
     <Layout>
       <Modal
-        title={book.currentPageId}
+        title={
+          <div>
+            <PageViewDropdown book={book} />
+          </div>
+        }
         visible={!!book.currentPageId}
         onCancel={() => dispatch(setCurrentPageId(book.id, ""))}
         bodyStyle={{ minHeight: "60vh", display: "flex" }}
         style={{ minWidth: "66vw" }}
         footer={
-          <div style={{display: 'flex', justifyContent: 'space-between'}}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
             <RemovePage bookId={book.id} pageId={book.currentPageId || ""} />
             <Button
               key="ok"

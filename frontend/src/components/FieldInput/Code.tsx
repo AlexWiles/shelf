@@ -17,15 +17,28 @@ import {
 import Editor from "react-simple-code-editor";
 import Prism, * as prism from "prismjs";
 import "prismjs/themes/prism.css";
-import { Collapsable } from "./Collapsable";
 import { transform } from "@babel/standalone";
 import { v4 } from "uuid";
 
 const pageValuesToJSON = (book: Book, page: Page) => {
   const obj = book.allFields.reduce((obj, fieldId) => {
-    const label = book.fieldsById[fieldId].label;
-    return { ...obj, ...{ [label]: page.values[fieldId] } };
-  }, {} as { [label: string]: ValueData });
+    const field = book.fieldsById[fieldId];
+    const label = field.label;
+
+    if (field.type === "select") {
+      const [tagId] = (page.values[fieldId] || []) as string[];
+      const tag = field.tags.find((t) => t.id === tagId);
+      return { ...obj, ...{ [label]: tag?.label } };
+    } else if (field.type === "tags") {
+      const tagIds = (page.values[fieldId] || []) as string[];
+      const tags = tagIds
+        .map((tagId) => field.tags.find((t) => t.id === tagId)?.label)
+        .filter((id) => id);
+      return { ...obj, ...{ [label]: tags } };
+    } else {
+      return { ...obj, ...{ [label]: page.values[fieldId] } };
+    }
+  }, {} as { [label: string]: any });
 
   return JSON.stringify(obj);
 };

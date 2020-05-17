@@ -11,6 +11,7 @@ import {
   AppState,
   Field,
   TableView,
+  PageView,
 } from "./types";
 
 import produce from "immer";
@@ -109,6 +110,26 @@ export type Action =
   | {
       type: "SET_CURRENT_TABLE_VIEW";
       data: { bookId: string; tableViewId: string };
+    }
+  | {
+      type: "UPDATE_PAGE_VIEW";
+      data: { bookId: string; pageView: PageView };
+    }
+  | {
+      type: "ADD_PAGE_VIEW";
+      data: { bookId: string; pageView: PageView };
+    }
+  | {
+      type: "DELETE_PAGE_VIEW";
+      data: { bookId: string; pageView: PageView };
+    }
+  | {
+      type: "SET_CURRENT_PAGE_VIEW";
+      data: { bookId: string; pageViewId: string };
+    }
+  | {
+      type: "UPDATE_FIELD_TAG";
+      data: { bookId: string; fieldId: string; tag: Tag };
     };
 
 export const newBook = (book: Book): Action => ({
@@ -264,11 +285,44 @@ export const setCurrentTableView = (
   data: { bookId, tableViewId },
 });
 
+export const updatePageView = (bookId: string, pageView: PageView): Action => ({
+  type: "UPDATE_PAGE_VIEW",
+  data: { bookId, pageView },
+});
+
+export const addPageView = (bookId: string, pageView: PageView): Action => ({
+  type: "ADD_PAGE_VIEW",
+  data: { bookId, pageView },
+});
+
+export const deletePageView = (bookId: string, pageView: PageView): Action => ({
+  type: "ADD_PAGE_VIEW",
+  data: { bookId, pageView },
+});
+
+export const setCurrentPageView = (
+  bookId: string,
+  pageViewId: string
+): Action => ({
+  type: "SET_CURRENT_PAGE_VIEW",
+  data: { bookId, pageViewId },
+});
+
+export const updateFieldTag = (
+  bookId: string,
+  fieldId: string,
+  tag: Tag
+): Action => ({
+  type: "UPDATE_FIELD_TAG",
+  data: { bookId, fieldId, tag },
+});
+
 export const reducer = (
   state: AppState = newAppState(),
   action: Action
 ): AppState => {
   //console.log(action);
+
   switch (action.type) {
     case "NEW_BOOK":
       return produce(state, (draftState) => {
@@ -366,8 +420,9 @@ export const reducer = (
     case "ADD_BOOK_FIELD":
       return produce(state, (draftState) => {
         const { bookId, fieldId, fieldType, label } = action.data;
+        const book = draftState.booksById[bookId];
 
-        draftState.booksById[bookId].allFields.push(fieldId);
+        book.allFields.push(fieldId);
 
         const newField: Field = {
           id: fieldId,
@@ -379,12 +434,27 @@ export const reducer = (
           readOnly: false,
         };
 
-        draftState.booksById[bookId].fieldsById[action.data.fieldId] = newField;
+        book.fieldsById[action.data.fieldId] = newField;
+
+        // make new field visible in current views
+        const pvVisibleFields =
+          book.pageViewsById[book.currentPageViewId].visibleFields;
+        if (pvVisibleFields) {
+          pvVisibleFields[fieldId] = true;
+        }
+
+        const tvVisibleFields =
+          book.tableViewsById[book.currentTableViewId].visibleFields;
+        if (tvVisibleFields) {
+          tvVisibleFields[fieldId] = true;
+        }
       });
 
     case "DELETE_BOOK_FIELD":
       return produce(state, (draftState) => {
         const { bookId, fieldId } = action.data;
+
+        // delete from book fields
         delete draftState.booksById[bookId].fieldsById[fieldId];
         draftState.booksById[bookId].allFields = draftState.booksById[
           bookId
@@ -439,6 +509,41 @@ export const reducer = (
       return produce(state, (draftState) => {
         const { bookId, tableViewId } = action.data;
         draftState.booksById[bookId].currentTableViewId = tableViewId;
+      });
+
+    case "UPDATE_PAGE_VIEW":
+      return produce(state, (draftState) => {
+        const { bookId, pageView } = action.data;
+        draftState.booksById[bookId].pageViewsById[pageView.id] = pageView;
+      });
+
+    case "ADD_PAGE_VIEW":
+      return produce(state, (draftState) => {
+        const { bookId, pageView } = action.data;
+        draftState.booksById[bookId].pageViewsById[pageView.id] = pageView;
+        draftState.booksById[bookId].allPageViews.push(pageView.id);
+        draftState.booksById[bookId].currentPageViewId = pageView.id;
+      });
+
+    case "SET_CURRENT_PAGE_VIEW":
+      return produce(state, (draftState) => {
+        const { bookId, pageViewId } = action.data;
+        draftState.booksById[bookId].currentPageViewId = pageViewId;
+      });
+
+    case "UPDATE_FIELD_TAG":
+      return produce(state, (draftState) => {
+        const { bookId, fieldId, tag } = action.data;
+
+        const field = draftState.booksById[bookId].fieldsById[fieldId];
+
+        field.tags = field.tags.map((t) => {
+          if (t.id === tag.id) {
+            return tag;
+          } else {
+            return t;
+          }
+        });
       });
 
     default:

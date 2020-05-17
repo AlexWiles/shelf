@@ -13,5 +13,5 @@ code {
 }
 
 .zIndexAbovePopup {
-  z-index: 1050;
+  z-index: 9999;
 }

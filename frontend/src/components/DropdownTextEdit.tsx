@@ -8,7 +8,7 @@ export const DropdownEditText: React.FC<{
     value: string;
     onChange: (value: string) => void;
   };
-  menuItems: ReactNode[];
+  menuItems: ReactNode;
   iconStyle?: React.CSSProperties;
   selectedMenuKeys?: string[];
 }> = ({ text, menuItems, selectedMenuKeys, iconStyle = {} }) => {
@@ -22,7 +22,7 @@ export const DropdownEditText: React.FC<{
         <Menu selectedKeys={selectedMenuKeys}>
           <Menu.Item
             key="name"
-            onClick={() => {
+            onClick={(e) => {
               setVisible(true);
             }}
           >
