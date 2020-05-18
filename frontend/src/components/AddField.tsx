@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FieldType, AppState, currentBook, Book, FIELD_TYPES } from "../types";
 import { useDispatch, useSelector } from "react-redux";
-import { Input, Select, Button } from "antd";
+import { Input, Select, Button, Popover, Typography } from "antd";
 import { addField } from "../store";
 import { v4 as uuidv4 } from "uuid";
 
@@ -49,14 +49,20 @@ export const AddField = () => {
           optionFilterProp="children"
           placeholder="Select field type"
           filterOption={(input, option) =>
-            option?.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+            option?.value.toLowerCase().indexOf(input.toLowerCase()) >= 0
           }
           value={selectedType}
           onChange={(v) => setSelectedType(v as FieldType)}
         >
-          {FIELD_TYPES.map(({ value, label }) => (
+          {FIELD_TYPES.map(({ description, value, label }) => (
             <Select.Option key={value} value={value}>
-              {label}
+              <Popover
+                overlayStyle={{ zIndex: 1200 }}
+                placement="right"
+                content={<div>{description}</div>}
+              >
+                <div>{label}</div>
+              </Popover>
             </Select.Option>
           ))}
         </Select>

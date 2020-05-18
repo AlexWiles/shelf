@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Tag,
   Page,
@@ -12,19 +12,22 @@ import { useDispatch } from "react-redux";
 import { LabeledValue } from "antd/lib/select";
 import { Select, Tag as AntdTag } from "antd";
 import { updatePageValueTags } from "../../store";
-import { v4 as uuidv4 } from "uuid";
-import { getRandomColor } from "../../lib";
+import { EllipsisOutlined } from "@ant-design/icons";
 
 type SelectInputProps = {
   book: Book;
   page: Page;
   field: Field;
+  onBlur?: () => void;
+  autoFocus?: boolean;
 };
 
 export const SelectInput: React.FC<SelectInputProps> = ({
   book,
   field,
   page,
+  onBlur = () => {},
+  autoFocus,
 }) => {
   const dispatch = useDispatch();
 
@@ -66,9 +69,15 @@ export const SelectInput: React.FC<SelectInputProps> = ({
 
   return (
     <Select
+      autoFocus={autoFocus}
+      onBlur={onBlur}
       mode="tags"
       style={{ width: "100%" }}
       labelInValue={true}
+      tagRender={(props) => {
+        const tag = getTagByLabel(field, props.label as string);
+        return <AntdTag color={tag?.color}>{props.label}</AntdTag>;
+      }}
       value={values.map(
         (tag): LabeledValue => ({
           key: tag.id,
@@ -86,5 +95,42 @@ export const SelectInput: React.FC<SelectInputProps> = ({
         );
       })}
     </Select>
+  );
+};
+
+export const SelectInputDisplay: React.FC<SelectInputProps> = ({
+  book,
+  page,
+  field,
+}) => {
+  const [showInput, setShowInput] = useState(false);
+
+  const taglist = (page.values[field.id] as string[]) || [];
+
+  return (
+    <div
+      style={{ display: "flex", cursor: "pointer" }}
+      onClick={() => (field.readOnly ? undefined : setShowInput(true))}
+    >
+      {showInput ? (
+        <SelectInput
+          book={book}
+          page={page}
+          field={field}
+          onBlur={() => setShowInput(false)}
+          autoFocus={true}
+        />
+      ) : (
+        taglist.map((tagId) => {
+          const tag = getTagById(field, tagId);
+          return (
+            <AntdTag key={tagId} color={tag?.color}>
+              {tag?.label}
+            </AntdTag>
+          );
+        })
+      )}
+      {taglist.length === 0 && !showInput ? <EllipsisOutlined /> : " "}
+    </div>
   );
 };

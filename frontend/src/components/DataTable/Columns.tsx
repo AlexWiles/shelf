@@ -9,14 +9,15 @@ import {
   fieldsForView,
   visibleFieldsForView,
 } from "../../types";
-import { Tag as AntdTag, Button } from "antd";
+import { Button } from "antd";
 import { RateInput } from "../FieldInput/Rate";
 import { CheckboxInput } from "../FieldInput/Checkbox";
-import { ArrowsAltOutlined, EllipsisOutlined } from "@ant-design/icons";
+import { ArrowsAltOutlined } from "@ant-design/icons";
 import { setCurrentPageId } from "../../store";
-import { TagsInputs, TagsInputDisplay } from "../FieldInput/Tags";
-import { ExecuteCodeButton } from "../FieldInput/Code";
+import { TagsInputDisplay } from "../FieldInput/Tags";
+import { ExecuteCodeButton, LiveCodeExecute } from "../FieldInput/Code";
 import { DatetimeInput } from "../FieldInput/Datetime";
+import { SelectInputDisplay } from "../FieldInput/Select";
 
 const tagColumn = (book: Book, field: Field, view: TableView) => ({
   render: (tagIds: undefined | string[], record: RowType) => {
@@ -36,10 +37,8 @@ const tagColumn = (book: Book, field: Field, view: TableView) => ({
 });
 
 const selectColumn = (book: Book, field: Field, view: TableView) => ({
-  render: (tagIds: undefined | string[]) => {
-    return (tagIds || []).map((tagId) => (
-      <AntdTag key={tagId}>{getTagById(field, tagId)?.label}</AntdTag>
-    ));
+  render: (tagIds: undefined | string[], record: RowType) => {
+    return <SelectInputDisplay book={book} page={record.page} field={field} />;
   },
   filterValue: (view.filters || {})[field.id],
   filterMultiple: false,
@@ -128,6 +127,14 @@ const actionColumn = (book: Book, dispatch: Dispatch<any>) => ({
   render: (page: Page) => {
     return (
       <div style={{ display: "flex" }}>
+        {book.allFields.reduce((arr, fieldId) => {
+          const field = book.fieldsById[fieldId];
+          if (field.type === "livecode") {
+            arr.push(<LiveCodeExecute book={book} field={field} page={page} />);
+          }
+          return arr;
+        }, [] as React.ReactNode[])}
+
         <Button
           size="small"
           onClick={(e) => {

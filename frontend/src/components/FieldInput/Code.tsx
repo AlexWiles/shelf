@@ -203,19 +203,15 @@ export const ExecuteCodeButton: React.FC<{
 };
 
 export const CodeEditor: React.FC<{
-  book: Book;
-  page: Page;
-  field: Field;
-}> = ({ book, page, field }) => {
-  const dispatch = useDispatch();
-
+  code: string;
+  disabled?: boolean;
+  onChange: (v: string) => void;
+}> = ({ code, disabled, onChange }) => {
   return (
     <Editor
-      value={field.text}
-      disabled={field.readOnly}
-      onValueChange={(v) => {
-        dispatch(updateBookFieldText(book.id, field.id, v));
-      }}
+      value={code}
+      disabled={disabled}
+      onValueChange={(v) => onChange(v)}
       highlight={(code) =>
         prism.highlight(code, Prism.languages.javascript, "javascript")
       }
@@ -224,6 +220,7 @@ export const CodeEditor: React.FC<{
         fontFamily: '"Fira code", "Fira Mono", monospace',
         fontSize: 12,
         outline: "none",
+        minHeight: 32,
       }}
     />
   );
@@ -234,9 +231,18 @@ export const CodeInput: React.FC<{
   page: Page;
   field: Field;
 }> = ({ book, page, field }) => {
+  const dispatch = useDispatch();
   return (
     <div style={{ flexGrow: 1 }}>
-      {field.readOnly ? undefined : <CodeEditor {...{ book, page, field }} />}
+      {field.readOnly ? undefined : (
+        <CodeEditor
+          code={field.text}
+          disabled={field.readOnly}
+          onChange={(v) => {
+            dispatch(updateBookFieldText(book.id, field.id, v));
+          }}
+        />
+      )}
       <div
         style={{
           display: "flex",
@@ -248,15 +254,13 @@ export const CodeInput: React.FC<{
   );
 };
 
-export const LiveCodeInput: React.FC<{
+export const LiveCodeExecute: React.FC<{
   book: Book;
   page: Page;
   field: Field;
 }> = ({ book, page, field }) => {
   const dispatch = useDispatch();
   const [sourceId] = useState(v4());
-  const [code, setCode] = useState(field.text);
-  const [updated, setUpdated] = useState(false);
 
   useEffect(() => {
     const listener = (event: MessageEvent) => {
@@ -278,25 +282,38 @@ export const LiveCodeInput: React.FC<{
       console.log(err);
       alert(err);
     }
-  }, [page]);
+  }, [book, page, field, sourceId]);
+
+  return <></>;
+};
+
+export const LiveCodeInput: React.FC<{
+  book: Book;
+  page: Page;
+  field: Field;
+}> = ({ book, page, field }) => {
+  const dispatch = useDispatch();
+  const [code, setCode] = useState(field.text);
+  const [updated, setUpdated] = useState(false);
 
   return (
-    <div style={{ position: "relative", flexGrow: 1 }}>
-      <Editor
-        value={code}
+    <div
+      style={{
+        position: "relative",
+        flexGrow: 1,
+        border: "1px solid rgb(217,217,217)",
+        borderRadius: 2,
+        minHeight: 32,
+      }}
+    >
+      <LiveCodeExecute {...{book, page, field}} />
+
+      <CodeEditor
+        code={code}
         disabled={field.readOnly}
-        onValueChange={(v) => {
-          setUpdated(true);
+        onChange={(v) => {
           setCode(v);
-        }}
-        highlight={(code) =>
-          prism.highlight(code, Prism.languages.javascript, "javascript")
-        }
-        padding={5}
-        style={{
-          fontFamily: '"Fira code", "Fira Mono", monospace',
-          fontSize: 12,
-          outline: "none",
+          setUpdated(true);
         }}
       />
       <Button

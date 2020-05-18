@@ -20,23 +20,25 @@ export type FieldType =
   | "select"
   | "rate"
   | "url"
-  | "code"
   | "textarea"
   | "checkbox"
   | "datetime"
-  | "iframe";
+  | "code"
+  | "livecode";
 
-export const FIELD_TYPES: { value: FieldType; label: string }[] = [
-  { value: "text", label: "Text" },
-  { value: "textarea", label: "Text area" },
-  { value: "tags", label: "Tags" },
-  { value: "select", label: "Select" },
-  { value: "rate", label: "Stars" },
-  { value: "url", label: "URL" },
-  { value: "checkbox", label: "Checkbox" },
-  { value: "datetime", label: "Date" },
-  { value: "code", label: "Code" },
-  { value: "iframe", label: "Live code" },
+
+type FieldTypeInfo = { value: FieldType; label: string, description?: string };
+export const FIELD_TYPES: FieldTypeInfo[] = [
+  { value: "text", label: "Text", description: "A simple, single line text field." },
+  { value: "textarea", label: "Text area", description: "A markdown editor field. Good for taking notes" },
+  { value: "tags", label: "Tags", description: "Multiple tags select" },
+  { value: "select", label: "Select", description: "Single tag select" },
+  { value: "rate", label: "Stars", description: "Five stars input. " },
+  { value: "url", label: "URL", description: "A text input for URLs" },
+  { value: "checkbox", label: "Checkbox", description: "A single checkbox" },
+  { value: "datetime", label: "Date", description: "A date input" },
+  { value: "code", label: "Script", description: "A piece of code that is executed when you click a button" },
+  { value: "livecode", label: "Live code", description: "A piece of code that continually runs." },
 ];
 
 export type Field = {
