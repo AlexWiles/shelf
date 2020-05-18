@@ -61,7 +61,7 @@ export const SelectInput: React.FC<SelectInputProps> = ({
     return (
       <>
         {values.map((tag) => {
-          return <AntdTag key={tag.id}>{tag.label}</AntdTag>;
+          return <AntdTag key={tag.id} color={tag.color}>{tag.label}</AntdTag>;
         })}
       </>
     );

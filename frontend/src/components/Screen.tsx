@@ -1,8 +1,16 @@
 import React from "react";
 import { Provider, useSelector, useDispatch } from "react-redux";
 import { Layout, Modal, Button } from "antd";
-import { store, setCurrentPageId } from "../store";
-import { AppState, currentBook, ViewingPage, newPage } from "../types";
+import { store, setCurrentPageId, updatePageView } from "../store";
+import {
+  AppState,
+  currentBook,
+  ViewingPage,
+  newPage,
+  fieldsForView,
+  visibleFieldsByIdForView,
+  Book,
+} from "../types";
 import { DataTable } from "./DataTable";
 import { PagePanel } from "./PagePanel";
 import { Sidebar } from "./Sidebar";
@@ -12,6 +20,25 @@ import { FieldDropdown } from "./FieldDropdown";
 
 export const AppProvider: React.FC = ({ children }) => {
   return <Provider store={store}>{children}</Provider>;
+};
+
+const PageViewFieldDropdown: React.FC<{ book: Book }> = ({ book }) => {
+  const dispatch = useDispatch();
+  const view = book.pageViewsById[book.currentPageViewId];
+
+  return (
+    <FieldDropdown
+      book={book}
+      allFields={fieldsForView(book, view)}
+      visibleFields={visibleFieldsByIdForView(book, view)}
+      onSortChange={(fieldIds) =>
+        dispatch(updatePageView(book.id, { ...view, ...{ fieldIds } }))
+      }
+      onVisibleChange={(visibleFields) => {
+        dispatch(updatePageView(book.id, { ...view, ...{ visibleFields } }));
+      }}
+    />
+  );
 };
 
 export const BookScreen: React.FC = () => {
@@ -27,8 +54,11 @@ export const BookScreen: React.FC = () => {
     <Layout>
       <Modal
         title={
-          <div>
-            <PageViewDropdown book={book} />
+          <div style={{ display: "flex" }}>
+            <span style={{ marginRight: 16 }}>
+              <PageViewDropdown book={book} />
+            </span>
+            <PageViewFieldDropdown book={book} />
           </div>
         }
         visible={!!book.currentPageId}

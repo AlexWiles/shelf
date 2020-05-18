@@ -275,13 +275,18 @@ export const LiveCodeExecute: React.FC<{
   }, [book, field, dispatch, sourceId, page]);
 
   useEffect(() => {
-    try {
-      const transpiled = compileFieldCode(book, page, field, sourceId);
-      eval(transpiled);
-    } catch (err) {
-      console.log(err);
-      alert(err);
-    }
+    const cb = () => {
+      try {
+        const transpiled = compileFieldCode(book, page, field, sourceId);
+        eval(transpiled);
+      } catch (err) {
+        console.log(err);
+        alert(err);
+      }
+    };
+
+    const timeout = setTimeout(cb, 1000);
+    return () => clearTimeout(timeout);
   }, [book, page, field, sourceId]);
 
   return <></>;
@@ -306,7 +311,7 @@ export const LiveCodeInput: React.FC<{
         minHeight: 32,
       }}
     >
-      <LiveCodeExecute {...{book, page, field}} />
+      <LiveCodeExecute {...{ book, page, field }} />
 
       <CodeEditor
         code={code}
