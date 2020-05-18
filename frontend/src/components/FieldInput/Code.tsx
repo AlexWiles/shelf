@@ -19,6 +19,7 @@ import Prism, * as prism from "prismjs";
 import "prismjs/themes/prism.css";
 import { transform } from "@babel/standalone";
 import { v4 } from "uuid";
+import { inifiniteLoopPlugin } from "../../lib/babel";
 
 const pageValuesToJSON = (book: Book, page: Page) => {
   const obj = book.allFields.reduce((obj, fieldId) => {
@@ -51,33 +52,7 @@ const fieldsByLabelJSON = (book: Book) => {
   );
 };
 
-export const codeApi = ({
-  book,
-  page,
-  field,
-  sourceId,
-}: {
-  book: Book;
-  page: Page;
-  field: Field;
-  sourceId: string;
-}) => {
-  const code = `
-    const proxy = (url, opts) => { return fetch("http://localhost:3001/requests?url=" + url, opts) }
-    const _VALS = ${pageValuesToJSON(book, page)};
-    const _FIELD_IDS = ${fieldsByLabelJSON(book)};
-    const getValue = (label) => _VALS[label];
-    const g = (l) => getValue(l);
-    const setValue = (label, value) => {
-      window.top.postMessage({type: "SET_VALUE", sourceFieldId: "${
-        field.id
-      }", sourceId: "${sourceId}", fieldId: _FIELD_IDS[label],  value: value})
-    };
-    const _props = { getValue, g, setValue, s};
-    const s = (l, v) => setValue(l, v);`;
 
-  return transform(code, {}).code || "";
-};
 
 const compileFieldCode = (
   book: Book,
@@ -99,7 +74,7 @@ const compileFieldCode = (
     const s = (l, v) => setValue(l, v);
     ${field.text}`;
 
-  return transform(code, {}).code || "";
+  return transform(code, {plugins: [inifiniteLoopPlugin]}).code || "";
 };
 
 export const handleMessage = (
