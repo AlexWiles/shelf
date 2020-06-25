@@ -2,8 +2,11 @@
 Shelf is an experimental table based application. 
 It is very flexible and allows users to extend the application with code from inside the app.
 
+### Tech
+It is all Typescript + React + AntD components. There is space for a backend, but I haven't implemented it yet.
 
-### A simple todo example
+
+# A simple todo example
 The application allows a user to create a schema composed of fields with a label and an input type. The schema can be used to create entries into a table.
 
 Here you can see a user opening a row of a table. This is just for context before we zoom in and focus on that edit row modal.
