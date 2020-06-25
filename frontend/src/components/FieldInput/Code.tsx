@@ -36,6 +36,11 @@ const pageValuesToJSON = (book: Book, page: Page) => {
         .map((tagId) => field.tags.find((t) => t.id === tagId)?.label)
         .filter((id) => id);
       return { ...obj, ...{ [label]: tags } };
+    } else if (field.type === "text") {
+      return {
+        ...obj,
+        ...{ [label]: page.values[fieldId] },
+      };
     } else {
       return { ...obj, ...{ [label]: page.values[fieldId] } };
     }
@@ -52,8 +57,6 @@ const fieldsByLabelJSON = (book: Book) => {
   );
 };
 
-
-
 const compileFieldCode = (
   book: Book,
   page: Page,
@@ -64,9 +67,13 @@ const compileFieldCode = (
     const proxy = (url, opts) => { return fetch("http://localhost:3001/requests?url=" + url, opts) }
     const _VALS = ${pageValuesToJSON(book, page)};
     const _FIELD_IDS = ${fieldsByLabelJSON(book)};
-    const getValue = (label) => _VALS[label];
+    const getValue = (label) => {
+      if (!(label in _FIELD_IDS)) { throw new Error("No field labeled: " + label) }
+      return _VALS[label]
+    };
     const g = (l) => getValue(l);
     const setValue = (label, value) => {
+      if (!(label in _FIELD_IDS)) { throw new Error('No field labeled: ' + label) }
       window.top.postMessage({type: "SET_VALUE", sourceFieldId: "${
         field.id
       }", sourceId: "${sourceId}", fieldId: _FIELD_IDS[label],  value: value})
@@ -74,7 +81,8 @@ const compileFieldCode = (
     const s = (l, v) => setValue(l, v);
     ${field.text}`;
 
-  return transform(code, {plugins: [inifiniteLoopPlugin]}).code || "";
+  console.log(code);
+  return transform(code, { plugins: [inifiniteLoopPlugin] }).code || "";
 };
 
 export const handleMessage = (
@@ -210,13 +218,21 @@ export const CodeInput: React.FC<{
   return (
     <div style={{ flexGrow: 1 }}>
       {field.readOnly ? undefined : (
-        <CodeEditor
-          code={field.text}
-          disabled={field.readOnly}
-          onChange={(v) => {
-            dispatch(updateBookFieldText(book.id, field.id, v));
+        <div
+          style={{
+            marginBottom: 5,
+            border: "1px solid rgb(217,217,217)",
+            borderRadius: 2,
           }}
-        />
+        >
+          <CodeEditor
+            code={field.text}
+            disabled={field.readOnly}
+            onChange={(v) => {
+              dispatch(updateBookFieldText(book.id, field.id, v));
+            }}
+          />
+        </div>
       )}
       <div
         style={{
@@ -265,6 +281,23 @@ export const LiveCodeExecute: React.FC<{
   }, [book, page, field, sourceId]);
 
   return <></>;
+};
+
+export const LiveCodeExecuteForPage: React.FC<{ book: Book; page: Page }> = ({
+  book,
+  page,
+}) => {
+  return (
+    <>
+      {book.allFields.reduce((arr, fieldId) => {
+        const field = book.fieldsById[fieldId];
+        if (field.type === "livecode") {
+          arr.push(<LiveCodeExecute book={book} page={page} field={field} />);
+        }
+        return arr;
+      }, [] as React.ReactNode[])}
+    </>
+  );
 };
 
 export const LiveCodeInput: React.FC<{

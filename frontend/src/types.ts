@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
 import { uniqueBy, getRandomColor } from "./lib";
-import produce from "immer";
 
 export type TagId = string;
 
@@ -38,7 +37,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   { value: "checkbox", label: "Checkbox", description: "A single checkbox" },
   { value: "datetime", label: "Date", description: "A date input" },
   { value: "code", label: "Script", description: "A piece of code that is executed when you click a button" },
-  { value: "livecode", label: "Live code", description: "A piece of code that continually runs." },
+  { value: "livecode", label: "Live code", description: "A piece of code that runs any time a page is changed." },
 ];
 
 export type Field = {

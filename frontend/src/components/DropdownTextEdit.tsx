@@ -1,7 +1,6 @@
 import React, { useState, ReactNode } from "react";
 import { Dropdown, Menu, Input } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
-import { DebouncedInput } from "./Inputs/Input";
 
 export const DropdownEditText: React.FC<{
   text: {
@@ -27,7 +26,7 @@ export const DropdownEditText: React.FC<{
               setVisible(true);
             }}
           >
-            <DebouncedInput
+            <Input
               type="text"
               value={text.value}
               onKeyPress={(e) => {
@@ -36,7 +35,7 @@ export const DropdownEditText: React.FC<{
                     return setVisible(false);
                 }
               }}
-              onChange={(value) => text.onChange(value)}
+              onChange={(e) => text.onChange(e.target.value)}
             />
           </Menu.Item>
           {menuItems}

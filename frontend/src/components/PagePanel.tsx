@@ -58,7 +58,7 @@ const FieldInputDisplay: React.FC<{ book: Book; page: Page }> = ({ book, page })
 export const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
   const page = book.pagesById[book.currentPageId || ""];
 
-  if (book) {
+  if (book && page) {
     return (
       <div
         style={{
@@ -77,7 +77,7 @@ export const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
           }}
         >
           <div>
-            {page ? <FieldInputDisplay book={book} page={page} /> : undefined}
+            <FieldInputDisplay book={book} page={page} />
             <AddField />
           </div>
 
@@ -94,6 +94,6 @@ export const PagePanel: React.FC<{ book: Book }> = ({ book }) => {
       </div>
     );
   } else {
-    return <div>Please visit a web page in the browser </div>;
+    return <div></div>;
   }
 };
