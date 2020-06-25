@@ -3,7 +3,7 @@ Shelf is an experimental table based application.
 It is very flexible and allows users to extend the application with code from inside the app.
 
 ### Tech
-It is all Typescript + React + AntD components. There is space for a backend, but I haven't implemented it yet.
+It is all Typescript + React + Antd components. There is space for a backend, but I haven't implemented it yet.
 
 
 # A simple todo example
